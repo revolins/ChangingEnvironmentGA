@@ -10,9 +10,9 @@ def convert_config_file_name_to_job(file_name, output_dir_base):
 common = """
 #!/bin/bash -login
 
-#PBS -l walltime=10:00:00
+#PBS -l walltime=72:00:00
 #PBS -l nodes=1:ppn=1
-#PBS -l mem=1gb
+#PBS -l mem=250mb
 #PBS -N changing_environment_test
 #PBS -t 1-{0}
 
@@ -30,7 +30,7 @@ number_of_organisms = 500
 mutation_rate = 0.20
 number_of_generations = {2}
 org_type = vector
-length = 100
+length = 500
 range_minimum = -512
 range_maximum = 512
 tournament_size = 10
@@ -40,7 +40,7 @@ verbose = False
 crowding = False
 """
 
-alt_corrs = [-1, -.99, -0.8, 0, 0.8, .99, 1]
+alt_corrs = [-1, -.99, -.9, -0.8, 0, 0.8, .9, .99, 1]
 #function_types = ["schafferf7"]
 function_types = ["rana"]
 #alt_corrs = [-.99, .99]
@@ -60,7 +60,7 @@ if __name__ == "__main__":
         write_to_file(config_filename, contents)
         config_files.append(config_filename)
 
-    output_dir_base = "length_100"
+    output_dir_base = "length_500"
     jobs = [convert_config_file_name_to_job(name, output_dir_base) for name in config_files]
 
 
