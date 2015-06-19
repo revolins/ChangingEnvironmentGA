@@ -71,7 +71,8 @@ def start_runs(jobs, submit_jobs=True, print_jobs=True):
     
 def create_config_files():
     config_files = []
-    for pop_cost in itertools.product(pop_costs):
+    #for pop_cost in itertools.product(pop_costs):
+    for pop_cost in pop_costs:
         config_filename = "{0}_gen.ini".format(pop_cost)
         contents = config_common.format(pop_cost)
         write_to_file(config_filename, contents)

@@ -5,7 +5,7 @@ Detail file for pd_organisms
 import csv
 
 #master function to call all the helpers
-def make_file_detail(organisms, past_organisms, current_generation):
+def make_file_detail(organisms, past_organisms, current_generation, filepath):
     # print out header for detail file that tells whats in it
     # print as a csv
     # to print data -- go through all dictionary keys, see strat, print output line: decision list, init memory, bits of mem
@@ -15,7 +15,7 @@ def make_file_detail(organisms, past_organisms, current_generation):
 
 
     # create csv writer
-    filename = 'detail-' + str(current_generation) + '.csv'
+    filename = filepath + '/detail-' + str(current_generation) + '.csv'
     header = ['Bits' , 'Decisions' , 'Memory' , 'Alive' , 'Id' , 'ParentId']
 
     # put data where we want it
