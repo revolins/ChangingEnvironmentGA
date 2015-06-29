@@ -3,12 +3,12 @@ import itertools
 from subprocess import call
 import datetime
 
-array_size = 5
+array_size = 10
 walltime = "03:59:00"
 today = "{0:%Y}_{0:%B}_{0:%d}".format(datetime.datetime.now())
 num_runs_per_job = 2
-output_dir_base = "pdoutput" + today
-pop_costs = [-1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0]
+output_dir_base = "pdoutput" + today + "size_bit_10_and_self_memory"
+pop_costs = [-0.5, 0.0, 0.01, 0.05, 0.075, 0.1, 0.2, 0.3, 0.4]
 #mutation_bits = [0.1, 0.2, 0.3, 0.4, 0.5]
 #mutation_initials = [0.1, 0.2, 0.3, 0.4, 0.5]
 common = """
@@ -40,10 +40,10 @@ reward = 3
 punishment = 1
 sucker = 0
 proportion_cost_per_memory_bit = {0}
-max_bits_of_memory = 4
+max_bits_of_memory = 10
 mutation_likelihood_of_bits_of_memory = 0.1
 mutation_likelihood_of_initial_memory_state = 0.1
-toggle_self_memory_on = False
+toggle_self_memory_on = True
 mutation_rate = 0.3
 output_frequency = 10
 """
@@ -57,6 +57,7 @@ def convert_config_file_name_to_job_string(file_name, output_dir_base):
 def write_to_file(filename, contents):
     with open(filename, "w") as file_handle:
         file_handle.write(contents)
+
 
 def start_runs(jobs, submit_jobs=True, print_jobs=True):
     for job in jobs:
@@ -73,7 +74,7 @@ def create_config_files():
     config_files = []
     #for pop_cost in itertools.product(pop_costs):
     for pop_cost in pop_costs:
-        config_filename = "{0}_gen.ini".format(pop_cost)
+        config_filename = "{1}_pd-{0}_gen.ini".format(pop_cost, "10_bits_memory_self_memory_on")
         contents = config_common.format(pop_cost)
         write_to_file(config_filename, contents)
         config_files.append(config_filename)
