@@ -14,7 +14,7 @@ def get_best_half(organisms):
 
 def get_number_of_tournaments(organisms):
     number_of_tournaments = len(organisms) // TOURNAMENT_SIZE
-    if not len(organisms) % TOURNAMENT_SIZE:
+    if len(organisms) % TOURNAMENT_SIZE:
         number_of_tournaments += 1
     return number_of_tournaments
 

@@ -87,6 +87,7 @@ def adjusted_payout(organism_a, organism_b):
         return payout * (1 - proportion_cost)
         
     payout_a, payout_b = run_game(organism_a, organism_b)
+
     a_proportion_cost = proportion_cost(organism_a)
     b_proportion_cost = proportion_cost(organism_b)
     
@@ -118,15 +119,17 @@ def get_average_payouts(organisms):
 
 def get_static_payouts(organisms, static_competitors):
     """
+    Get average payouts for orgs in static competitions
     """
-    
+
     for org in organisms:
         org.average_payout = get_static_fitness(org, static_competitors)
 
 def get_static_fitness(org, static_competitors):
     """
+    Gets fitness for orgs in static competitions
     """
     
     payouts = [adjusted_payout(org, comp)[0] for comp in static_competitors]
-    
+
     return sum(payouts) / (len(payouts) * 1.0)
