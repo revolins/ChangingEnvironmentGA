@@ -116,4 +116,17 @@ def get_average_payouts(organisms):
     for i in range(len(organisms)):
         organisms[i].average_payout = average_payouts[i]
 
+def get_static_payouts(organisms, static_competitors):
+    """
+    """
+    
+    for org in organisms:
+        org.average_payout = get_static_fitness(org, static_competitors)
 
+def get_static_fitness(org, static_competitors):
+    """
+    """
+    
+    payouts = [adjusted_payout(org, comp)[0] for comp in static_competitors]
+    
+    return sum(payouts) / (len(payouts) * 1.0)
