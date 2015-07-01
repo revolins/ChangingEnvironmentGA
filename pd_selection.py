@@ -33,7 +33,7 @@ def get_next_generation_by_selection(organisms):
             for i in range(number_of_tournaments):
                 yield organisms[TOURNAMENT_SIZE * i: TOURNAMENT_SIZE * (i + 1)]         
                    
-    next_generation = []
+   
     #function that adds things to next generation
     contender_generator = generate_contenders(organisms)
    
@@ -43,8 +43,14 @@ def get_next_generation_by_selection(organisms):
     for _ in range(number_of_tournaments):
         contenders = next(contender_generator)
         pd_tournament.get_average_payouts(contenders)
+    
+    return  get_next_generation_by_selection_tournament(organisms, contender_generator)
 
 
+def get_next_generation_by_selection_tournament(organisms, contender_generator):
+
+    next_generation = []
+   
     while len(next_generation) < len(organisms):
         #pick organisms for the tournament
         contenders = next(contender_generator)
