@@ -11,6 +11,22 @@ def get_best_half(organisms):
     sorted_orgs = sorted(organisms, key=lambda org: org.average_payout, reverse=True)
     best_half_orgs = sorted_orgs[:len(organisms) // 2]
     return best_half_orgs[:]
+
+def get_number_of_tournaments(organisms):
+    number_of_tournaments = len(organisms) // TOURNAMENT_SIZE
+    if not len(organisms) % TOURNAMENT_SIZE:
+        number_of_tournaments += 1
+    return number_of_tournaments
+
+
+def get_contender_generator(organisms, number_of_tournaments):
+        
+    def generate_contenders(organisms):
+        while True:
+            random.shuffle(organisms)
+            for i in range(number_of_tournaments):
+                yield organisms[TOURNAMENT_SIZE * i: TOURNAMENT_SIZE * (i + 1)]         
+    return generate_contenders(organisms)
     
 def get_next_generation_by_selection(organisms):
     """
@@ -23,20 +39,9 @@ def get_next_generation_by_selection(organisms):
     population and make more clumps
     It repeats more tournaments until the next generation reaches the population size
     """
-    number_of_tournaments = len(organisms) // TOURNAMENT_SIZE
-    if not len(organisms) % TOURNAMENT_SIZE:
-        number_of_tournaments += 1
-        
-    def generate_contenders(organisms):
-        while True:
-            random.shuffle(organisms)
-            for i in range(number_of_tournaments):
-                yield organisms[TOURNAMENT_SIZE * i: TOURNAMENT_SIZE * (i + 1)]         
-                   
-   
-    #function that adds things to next generation
-    contender_generator = generate_contenders(organisms)
-   
+    number_of_tournaments = get_number_of_tournaments(organisms)
+    contender_generator = get_contender_generator(organisms, number_of_tournaments)
+    
     #pick organisms for tournament
     #gets organisms average payout
 
@@ -44,10 +49,10 @@ def get_next_generation_by_selection(organisms):
         contenders = next(contender_generator)
         pd_tournament.get_average_payouts(contenders)
     
-    return  get_next_generation_by_selection_tournament(organisms, contender_generator)
+    return  _get_next_generation(organisms, contender_generator)
 
 
-def get_next_generation_by_selection_tournament(organisms, contender_generator):
+def _get_next_generation(organisms, contender_generator):
 
     next_generation = []
    
