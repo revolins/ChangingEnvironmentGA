@@ -34,10 +34,12 @@ def make_strategy_dictionary(fileregx):
   #initializing dictionary
   #puts all the strategies ever into dictionary
   last_file = filelist[-1]
+  print last_file
   with open(last_file, 'rb') as csvfile:
     reader = csv.reader(csvfile)
     reader.next()
     for row in reader:
+      print row
       key = row[1] + "~" + row[2]
       number_of_strategies[key] = []
 
@@ -72,7 +74,7 @@ def make_strategy_dictionary(fileregx):
   strategies_df = pandas.DataFrame.from_dict(number_of_strategies, orient= 'index')
   #concatenating multiple data frames
   condition = fileregx.split("/")[-1]
-  condition = condition.split("_")[0]
+  condition = condition.split("_")[3]
   condition = condition[3:]
   strategies_df['condition'] = [condition] * len(number_of_strategies)
   strategies_df['Strategy'] = number_of_strategies.keys()
@@ -82,8 +84,8 @@ def make_strategy_dictionary(fileregx):
 
 list_most_common = "Common_Strategy, Condition\n"
 
-values_do_not_want = ['pd--1.0_', 'pd-0.3_', 'pd-0.0_', 'pd--0.5_', 'pd-0.4_', 'pd-0.5_', 'pd-0.75_', 'pd-1.0_', 'pd-7.0_']
-for paths in glob.glob("/mnt/home/leasmika/ChangingEnvironmentGA/pdoutput2015_June_26self_memory_on/*"):
+values_do_not_want = ['pd--1.0_', 'pd-0.3_', 'pd-0.0_', 'pd--0.5_', 'pd-0.4_', 'pd-0.5_', 'pd-1.0_', 'pd-7.0_']
+for paths in glob.glob("/mnt/home/leasmika/ChangingEnvironmentGA/pdoutput2015_June_28size_bit_10/*"):
   if any(filter(lambda x: x in paths, values_do_not_want)):
     continue
   if (os.path.isdir(paths)):
