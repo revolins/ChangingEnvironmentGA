@@ -32,6 +32,7 @@ ALTERNATE_ENVIRONMENT_CORR = None
 START_TIME = None
 CROWDING = False
 OUTPUT_FREQUENCY = None
+SELECTION_BY_STATIC_COMPETITOR = False
 
 def create_initial_population():
     """
@@ -124,9 +125,12 @@ def pd_evolve_population():
             past_organisms[org] = [org]
         
     pd_make_detail_file.make_file_detail(organisms, past_organisms, 0, OUTPUT_FOLDER)
-
+    
     for i in range(NUMBER_OF_GENERATIONS):       
-        organisms = pd_selection.get_next_generation_by_selection(organisms)
+        if SELECTION_BY_STATIC_COMPETITOR:
+            organisms = pd_selection.get_next_generation_by_static_payout(organisms)
+        else:
+            organisms = pd_selection.get_next_generation_by_selection(organisms)
         organisms = get_mutated_population(organisms)
         output.append(pd_analysis.get_tally_of_number_of_bits_of_memory(organisms))
 
@@ -262,6 +266,7 @@ def set_global_variables(config):
         global CROWDING
         CROWDING = eval(config.get("DEFAULT", "crowding"))
     elif ORG_TYPE == "pd":
+        SELECTION_BY_STATIC_COMPETITOR = config.getboolean("DEFAULT", "selection_by_static_competitor")
         pd_tournament.NUMBER_OF_ROUNDS = config.getint("DEFAULT", "number_of_rounds")
         pd_tournament.TEMPTATION = config.getint("DEFAULT", "temptation")
         pd_tournament.REWARD = config.getint("DEFAULT", "reward")

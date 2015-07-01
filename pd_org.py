@@ -167,8 +167,43 @@ class PDOrg(object):
     def is_better_than(self, other, environment):
         raise NotImplementedError()
         
-    
+class PDStochasticOrg(PDOrg):
+    """
+    """
+    next_org_id = 0
 
+    def __init__(self, genotype=None, parent=None):
+        if genotype is None:
+            genotype = 0.5
+        self.genotype = genotype
+        self.id = PDStochasticOrg.next_org_id
+        PDStochasticOrg.next_org_id += 1
+        self.parent = parent
+        self.average_payout = None
+    
+    def get_mutant(self):
+        new_genotype = random.random()
+        return PDStochasticOrg(new_genotype, self.id)
+    
+    def _str_(self):
+        return "PDStochasticOrg({})".format(self.genotype)
+
+    def will_cooperate(self):
+        return self.genotype > random.random()
+
+    def store_bit_of_memory(self, did_cooperate):
+        pass
+    
+    def initialize_memory(self):
+        pass
+    
+    def fitness(self, environment):
+        raise NotImplementedError()
+    
+    def is_better_than(self, other, environment):
+        raise NotImplementedError()
+   
+            
 def _create_random_genotype():
     """
     Creates random memory PD genotype
@@ -185,4 +220,6 @@ def _create_random_genotype():
 MAX_BITS_OF_MEMORY = 1
 ALL_DEFECT = PDOrg(MemoryPDGenotype(0, [False], []))
 TIT_FOR_TAT = PDOrg(MemoryPDGenotype(1, [False, True], [True]))
-STATIC_COMPETITORS = [ALL_DEFECT, TIT_FOR_TAT]
+COIN_FLIP = PDStochasticOrg()
+STATIC_COMPETITORS = [ALL_DEFECT, TIT_FOR_TAT, COIN_FLIP]
+
