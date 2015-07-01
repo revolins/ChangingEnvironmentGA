@@ -182,4 +182,7 @@ def _create_random_genotype():
     return MemoryPDGenotype(number_of_bits_of_memory, decision_list, initial_memory)
 
 
-
+MAX_BITS_OF_MEMORY = 1
+ALL_DEFECT = PDOrg(MemoryPDGenotype(0, [False], []))
+TIT_FOR_TAT = PDOrg(MemoryPDGenotype(1, [False, True], [True]))
+STATIC_COMPETITORS = [ALL_DEFECT, TIT_FOR_TAT]

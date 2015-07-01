@@ -1,6 +1,6 @@
 import pd_tournament
 import random
-
+import pd_org
 TOURNAMENT_SIZE = None
 
 def get_best_half(organisms):
@@ -19,8 +19,8 @@ def get_number_of_tournaments(organisms):
     return number_of_tournaments
 
 
-def get_contender_generator(organisms, number_of_tournaments):
-        
+def get_contender_generator(organisms):
+    number_of_tournaments = get_number_of_tournaments(organisms)    
     def generate_contenders(organisms):
         while True:
             random.shuffle(organisms)
@@ -40,7 +40,7 @@ def get_next_generation_by_selection(organisms):
     It repeats more tournaments until the next generation reaches the population size
     """
     number_of_tournaments = get_number_of_tournaments(organisms)
-    contender_generator = get_contender_generator(organisms, number_of_tournaments)
+    contender_generator = get_contender_generator(organisms)
     
     #pick organisms for tournament
     #gets organisms average payout
@@ -66,3 +66,10 @@ def _get_next_generation(organisms, contender_generator):
     #make next_generation same length as organisms
     return next_generation[:len(organisms)]
     
+def get_next_generation_by_static_payout(organisms):
+    #create static competitors
+    pd_tournament.get_static_payouts(organisms, pd_org.STATIC_COMPETITORS)
+    #set up contender_generator
+    contender_generator = get_contender_generator(organisms)
+    #_get_next_generation
+    return _get_next_generation(organisms, contender_generator)
