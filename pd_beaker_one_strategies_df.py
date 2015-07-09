@@ -9,7 +9,7 @@ import sys
 #increase size limit
 csv.field_size_limit(sys.maxsize)
 
-#fileregx = "/Users/mikamimori/Documents/MSUSROP/ChangingEnvironmentGA/data/detail-*.csv"
+
 #empty list to store all data frames
 frames = []
 
@@ -34,12 +34,11 @@ def make_strategy_dictionary(fileregx):
   #initializing dictionary
   #puts all the strategies ever into dictionary
   last_file = filelist[-1]
-  print last_file
+
   with open(last_file, 'rb') as csvfile:
     reader = csv.reader(csvfile)
     reader.next()
     for row in reader:
-      print row
       key = row[1] + "~" + row[2]
       number_of_strategies[key] = []
 
@@ -73,19 +72,19 @@ def make_strategy_dictionary(fileregx):
 
   strategies_df = pandas.DataFrame.from_dict(number_of_strategies, orient= 'index')
   #concatenating multiple data frames
-  condition = fileregx.split("/")[-1]
-  condition = condition.split("_")[3]
-  condition = condition[3:]
-  strategies_df['condition'] = [condition] * len(number_of_strategies)
+  Condition = fileregx.split("/")[-1]
+  Condition = Condition.split("_")[4]
+  Condition = Condition[3:]
+  strategies_df['Condition'] = [Condition] * len(number_of_strategies)
   strategies_df['Strategy'] = number_of_strategies.keys()
   
-  return strategies_df, [common_one_strategy, condition]
+  return strategies_df, [common_one_strategy, Condition]
  
 
 list_most_common = "Common_Strategy, Condition\n"
 
-values_do_not_want = ['pd--1.0_', 'pd-0.3_', 'pd-0.0_', 'pd--0.5_', 'pd-0.4_', 'pd-0.5_', 'pd-1.0_', 'pd-7.0_']
-for paths in glob.glob("/mnt/home/leasmika/ChangingEnvironmentGA/pdoutput2015_June_28size_bit_10/*"):
+values_do_not_want = ['pd--1.0_', 'pd-0.3_', 'pd-0.2_', 'pd-0.1_', 'pd-0.0_', 'pd--0.5_', 'pd-0.4_', 'pd-0.5_', 'pd-1.0_', 'pd-7.0_']
+for paths in glob.glob("/mnt/home/leasmika/ChangingEnvironmentGA/pdoutput2015_July_02selection_by_static_competitor/*"):
   if any(filter(lambda x: x in paths, values_do_not_want)):
     continue
   if (os.path.isdir(paths)):
@@ -102,8 +101,9 @@ for paths in glob.glob("/mnt/home/leasmika/ChangingEnvironmentGA/pdoutput2015_Ju
           binary_most_common += str(0)
       binary_most_common += "~"
     most_common[0] = binary_most_common
-    list_most_common += ",".join(most_common) + "\n"
     print("Finished" + str(paths))
+    list_most_common += ",".join(most_common) + "\n"
+
 strategies_df = pandas.concat(frames)
 
 most_common_file = file("most_common.csv", "wb")

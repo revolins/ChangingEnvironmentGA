@@ -108,17 +108,21 @@ class TestFunctionsSelfMemoryOff(unittest.TestCase):
         self.assertAlmostEqual(expected_payout_a, actual_payout_a, 2)
         self.assertEqual(expected_payout_b, actual_payout_b)
     
-  #  def test_get_static_payouts(self):
-   #     static_competitors = [org_a, org_b]
-    #    organisms = [org_a, org_b]
-     #   org_a = pd_org.PDOrg(pd_org.MemoryPDGenotype(0, [True], []))
-      #  org_b = pd_org.PDOrg(pd_org.MemoryPDGenotype(0, [False], []))
-       
+    def test_get_static_payouts(self):
+        org_a = pd_org.PDOrg(pd_org.MemoryPDGenotype(0, [True], []))
+        org_b = pd_org.PDOrg(pd_org.MemoryPDGenotype(0, [False], []))
+        static_competitors = [org_a, org_b]
+        organisms = [org_a, org_b]
         
+        pd_tournament.get_static_payouts(organisms, static_competitors)
+        org_a_expected = 3.0
+        org_b_expected = 6.0
+
+        self.assertAlmostEqual(org_a_expected, org_a.average_payout, 2)
+        self.assertAlmostEqual(org_b_expected, org_b.average_payout, 2)
 
     def test_get_static_fitness(self):
 
-        print "should be three", pd_tournament.pd_payout(True, True)
         org_a = pd_org.PDOrg(pd_org.MemoryPDGenotype(0, [True], []))
         org_b = pd_org.PDOrg(pd_org.MemoryPDGenotype(0, [False], []))
         org_c = pd_org.PDOrg(pd_org.MemoryPDGenotype(0, [True], []))

@@ -6,7 +6,7 @@ library (dplyr)
 
 #strategies_df <- as.data.frame(beaker::get('strategies_df'))
 strategies_df <- read.csv("strategies_df.csv", header=FALSE)
-
+#strategies_df <- read.csv("
 #renaming column names in dataframe
 colnames(strategies_df) <- c('Row_Label', seq(0, 500, 10), 'Condition', 'Strategy')
 
@@ -17,15 +17,15 @@ strategies_df <- melt(strategies_df)
 
 #rename axis
 
-colnames(strategies_df)[3] <- "Generation"
+colnames(strategies_df)[2] <- "Generation"
 
-#print(strategies_df$Generation)
+#print(strategies_df)
 
 #tell x is a number
 strategies_df$Generation <- as.numeric(strategies_df$Generation) 
 
 #tell y is a number
-colnames(strategies_df)[4] <- "Frequency"
+colnames(strategies_df)[3] <- "Frequency"
 strategies_df$Frequency <- as.numeric(strategies_df$Frequency)
 
 #print(strategies_df$Generation)
@@ -34,3 +34,8 @@ strategies_df$Frequency <- as.numeric(strategies_df$Frequency)
 ggplot(data = strategies_df, aes(x = Generation, y = Frequency, group = Strategy, color = Strategy)) +  geom_line() + theme_minimal() +  theme(panel.grid.major = element_blank(), panel.background = element_blank(), panel.grid.minor = element_blank(), legend.position ="none") + scale_x_continuous() 
 
 ggsave("Strategy_Frequency_Plot.pdf")       	 		  		     		      		       	    
+
+
+
+
+

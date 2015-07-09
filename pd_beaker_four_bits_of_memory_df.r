@@ -5,11 +5,11 @@ library (dplyr)
 
 #THIS IS FOR BITS OF MEMORY OVER TIME
 
-bits_of_memory_df <- read.csv("all_bits_df_5_bits.csv")
+bits_of_memory_df <- read.csv("all_bits_df_static_comp_more_values.csv")
 #bits_of_memory_df <- as.data.frame(beaker::get('all_bits_df'))
 
 #add
-colnames(bits_of_memory_df) <- c('Row_Label', 'B0', 'B1', 'B2', 'B3', 'B4','B5', 'Condition', 'Generation')
+colnames(bits_of_memory_df) <- c('Row_Label', 'B0', 'B1', 'B2', 'B3', 'B4','Condition', 'Generation')
 
 bits_of_memory_df$Row_Label <- NULL
 bits_of_memory_df$Generation <- as.numeric(as.character(bits_of_memory_df$Generation))
@@ -19,7 +19,7 @@ bits_of_memory_df$B1 <- as.numeric(as.character(bits_of_memory_df$B1))
 bits_of_memory_df$B2 <- as.numeric(as.character(bits_of_memory_df$B2))
 bits_of_memory_df$B3 <- as.numeric(as.character(bits_of_memory_df$B3))
 bits_of_memory_df$B4 <- as.numeric(as.character(bits_of_memory_df$B4))
-bits_of_memory_df$B5 <- as.numeric(as.character(bits_of_memory_df$B5))
+
 
 #Use for testing
 #Dummy df columns
@@ -36,11 +36,11 @@ bits_of_memory_df$B5 <- as.numeric(as.character(bits_of_memory_df$B5))
 #dummy_df$Condition <- as.factor(dummy_df$Condition)
 #bits_of_memory_df <- rbind(bits_of_memory_df, dummy_df)
 
+#bits_of_memory_df
 
 
-
-weights = 0:5
-bits_of_memory_df$Mean <- apply(bits_of_memory_df, 1, function(d) {weighted.mean(weights, d[1:6])})
+weights = 0:4
+bits_of_memory_df$Mean <- apply(bits_of_memory_df, 1, function(d) {weighted.mean(weights, d[1:5])})
 
 #want a smaller df
 #for given condition and generation what is the mean of  the means
@@ -51,17 +51,18 @@ summary_df <- summarize(summary_df, group_mean = mean(Mean), group_sd = sd(Mean)
 #standard deviation
 #print(summary_df)
 #bits_of_memory_df$Generation <- c(1:nrow(bits_of_memory_df))
-#bits_of_memory_df
+
+
 
 
 ggplot(data = summary_df, aes(x = Generation, y = group_mean, fill = Condition, ymin = group_mean - group_sd, ymax = group_mean + group_sd)) + geom_line(aes(color = Condition)) + theme_minimal() + geom_ribbon(alpha=.3) + theme(panel.grid.major = element_blank(), panel.background = element_blank(), panel.grid.minor = element_blank()) + scale_y_continuous("Average Bits of Memory")
 
-ggsave("Average_Bits_Memory_Overtime_5_Bits.pdf")
+ggsave("Average_Bits_Memory_Overtime_Static_Comp.pdf")
 
 
-ggplot(data = subset(summary_df, Condition %in% c(-0.5, 0, 0.01, 0.05, 0.075, 0.1, 0.2)), aes(x = Generation, y = group_mean, fill = Condition, ymin = group_mean - group_sd, ymax = group_mean + group_sd)) + geom_line(aes(color = Condition)) + theme_minimal() + geom_ribbon(alpha=.3) + theme(panel.grid.major = element_blank(), panel.background = element_blank(), panel.grid.minor = element_blank()) + scale_y_continuous("Average Bits of Memory")
+ggplot(data = subset(summary_df, Condition %in% c(0, 0.01, 0.03, 0.05, 0.075)), aes(x = Generation, y = group_mean, fill = Condition, ymin = group_mean - group_sd, ymax = group_mean + group_sd)) + geom_line(aes(color = Condition)) + theme_minimal() + geom_ribbon(alpha=.3) + theme(panel.grid.major = element_blank(), panel.background = element_blank(), panel.grid.minor = element_blank()) + scale_y_continuous("Average Bits of Memory") + scale_fill_manual(values=c("#F5828C", "#8CF582", "#82F5EB", "#828BF5")) + scale_color_manual(values=c( "#F5828C", "#8CF582",  "#82F5EB", "#828BF5"))
 
-ggsave("Average_Bits_Memory_Overtime_Restricted_5_Bits.pdf")
+ggsave("Average_Bits_Memory_Overtime_Restricted_Static_Comp.pdf")
 
 
 
@@ -97,4 +98,4 @@ kruskal_bits
 #Like TUKEY but doesn't assume normality
 pairwise.wilcox.test(end_df$Mean, end_df$Condition, "bonferroni")
 
-#warnings()
+warnings()

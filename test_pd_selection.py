@@ -47,16 +47,23 @@ class TestSelection(unittest.TestCase):
         clump = next(gen)
         self.assertEqual(3, len(clump))
         
-    #def test_get_next_generation(self):
-        
-    
     def test_get_next_generation_by_selection(self):
         result = pd_selection.get_next_generation_by_selection(self.organisms)
         self.assertEqual(len(self.organisms),len(result))
      
-    def get_next_generation_by_static_payout(self):
-        pass
-
+    def test_get_next_generation_by_static_payout(self):
+        organism_a = pd_org.PDOrg(pd_org.MemoryPDGenotype(0,[True], []))
+        organism_b = pd_org.PDOrg(pd_org.MemoryPDGenotype(0,[False], []))
+        organisms = [organism_a, organism_b]
+        static_competitors = [organism_a, organism_b]
         
+        contender_generator = pd_selection.get_contender_generator(organisms)
+        pd_selection.get_next_generation_by_selection(organisms)        
+        results = pd_selection._get_next_generation(organisms, contender_generator)
+        
+       
+        expected = [organism_a, organism_b]
+        self.assertEqual(expected, expected)
+
 if __name__ == "__main__":
     unittest.main()
