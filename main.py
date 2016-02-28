@@ -266,6 +266,7 @@ def set_global_variables(config):
         global CROWDING
         CROWDING = eval(config.get("DEFAULT", "crowding"))
     elif ORG_TYPE == "pd":
+        global SELECTION_BY_STATIC_COMPETITOR
         SELECTION_BY_STATIC_COMPETITOR = config.getboolean("DEFAULT", "selection_by_static_competitor")
         pd_tournament.NUMBER_OF_ROUNDS = config.getint("DEFAULT", "number_of_rounds")
         pd_tournament.TEMPTATION = config.getint("DEFAULT", "temptation")

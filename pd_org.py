@@ -11,6 +11,10 @@ MAX_BITS_OF_MEMORY = None
 MUTATION_LIKELIHOOD_OF_BITS_OF_MEMORY = None
 MUTATION_LIKELIHOOD_OF_INITIAL_MEMORY_STATE = None
 
+class StochasticPDGenotype(object):
+    def __init__(self, probability=.5, number_of_bits_of_memory=0):
+        self.probability = probability
+        self.number_of_bits_of_memory = number_of_bits_of_memory
 
 class MemoryPDGenotype(object):
     """
@@ -174,7 +178,7 @@ class PDStochasticOrg(PDOrg):
 
     def __init__(self, genotype=None, parent=None):
         if genotype is None:
-            genotype = 0.5
+            genotype = StochasticPDGenotype()
         self.genotype = genotype
         self.id = PDStochasticOrg.next_org_id
         PDStochasticOrg.next_org_id += 1
@@ -189,7 +193,7 @@ class PDStochasticOrg(PDOrg):
         return "PDStochasticOrg({})".format(self.genotype)
 
     def will_cooperate(self):
-        return self.genotype > random.random()
+        return self.genotype.probability > random.random()
 
     def store_bit_of_memory(self, did_cooperate):
         pass
