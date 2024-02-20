@@ -14,12 +14,12 @@ COLORS = ["silver", "maroon", "red", "purple", "fuchsia", "green", "lime", "oliv
               "navy", "blue", "teal", "aqua"]
 
 def main():
-    test_dir = "output_test"
+    test_dir = "outputs"
     data = get_data(test_dir)
     #data = get_pickled_data(test_dir)
-    pop_costs = None
-    mutation_bits = "0.5"
-    mutation_initials = "0.1"
+    pop_costs = None # originally None
+    mutation_bits = None # originally "0.5"
+    mutation_initials = None # originally "0.1"
     plot_aggregate_over_time(data, pop_costs, mutation_bits, mutation_initials, test_dir)
 
 
