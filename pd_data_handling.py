@@ -70,10 +70,10 @@ def plot_aggregate_over_time(data, pop_cost=None, mutation_bit=None, mutation_in
             num_orgs = df.sum(1)
             
             for i in range(2,len(df.columns)):
-              
                 df_weighted +=  df["Organisms With {0} Bits of Memory".format(i)].multiply(i)
            
             averages_df_list.append(df_weighted.multiply(1.0 / num_orgs))
+
         #averages all the runs
         for gen in range(len(averages_df_list[0])):
             df_sum = 0.0
