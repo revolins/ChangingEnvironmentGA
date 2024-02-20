@@ -1,6 +1,6 @@
 import unittest
 import old_fitness_function as ff
-import fitness_function as cy
+import old_fitness_function as cy
 import numpy as np
 
 class TestFitnessFunction(unittest.TestCase):

@@ -7,19 +7,18 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 #import scipy.stats as stats
-import cPickle
 import operator
 
 COLORS = ["silver", "maroon", "red", "purple", "fuchsia", "green", "lime", "olive", "yellow",
               "navy", "blue", "teal", "aqua"]
 
 def main():
-    test_dir = "pdoutput2015_June_15"
+    test_dir = "pd_check"
     data = get_data(test_dir)
     #data = get_pickled_data(test_dir)
     pop_costs = None
-    mutation_bits = "0.5"
-    mutation_initials = "0.1"
+    mutation_bits = None
+    mutation_initials = None
     plot_aggregate_over_time(data, pop_costs, mutation_bits, mutation_initials, test_dir)
 
 
@@ -35,6 +34,7 @@ def get_data(common_dir):
             continue
         #Grab the meaningful config name
         sub_dir_name_list = sub_dir.split("/")[-1].split(".")
+        print(sub_dir_name_list)
         config = ".".join(sub_dir_name_list[:-1])
         #removes gen quick fix
         config = config[:-3]

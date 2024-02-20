@@ -1,4 +1,4 @@
-import ConfigParser
+import configparser
 import argparse
 from main import set_global_variables, generate_data
 import sys
@@ -16,7 +16,7 @@ def parse_everything(command_line_args=None):
     output_folder = args.output_folder[0]
     config_file = args.config_file[0]
 
-    config = ConfigParser.SafeConfigParser()
+    config = configparser.SafeConfigParser()
     config.read([config_file])
     config.set("DEFAULT", "config_file", config_file)
     config.set("DEFAULT", "output_folder", output_folder)

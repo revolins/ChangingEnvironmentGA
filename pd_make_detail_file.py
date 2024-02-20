@@ -37,7 +37,7 @@ def make_file_detail(organisms, past_organisms, current_generation, filepath):
         row.append([org.parent for org in past_organisms[key]])
         data.append(row)
     # creates csv file
-    with open(filename, 'wb') as f:
+    with open(filename, 'w') as f:
         writer = csv.writer(f)
         writer.writerow(header)
         writer.writerows(data)

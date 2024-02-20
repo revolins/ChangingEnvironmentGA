@@ -1,0 +1,10 @@
+Bits,Decisions,Memory,Alive,Id,ParentId
+2,"[True, False, True, False]","[True, True]",1,[2],[None]
+2,"[True, False, True, False]","[False, False]",1,[3],[None]
+1,"[True, False]",[False],1,[4],[None]
+2,"[True, True, False, False]","[False, False]",1,[5],[None]
+1,"[False, False]",[True],1,[6],[None]
+1,"[True, False]",[True],2,"[7, 11]","[None, None]"
+2,"[True, True, False, False]","[True, False]",1,[8],[None]
+1,"[False, True]",[False],1,[9],[None]
+2,"[False, False, False, True]","[True, False]",1,[10],[None]

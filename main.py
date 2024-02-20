@@ -9,7 +9,7 @@ import csv
 import string_org
 import real_value_vector_org
 import scipy.stats as stats
-import fitness_function as ff
+import old_fitness_function as ff
 from math import floor
 import os
 import shutil
@@ -281,7 +281,7 @@ def set_global_variables(config):
         pd_org.MUTATION_LIKELIHOOD_OF_INITIAL_MEMORY_STATE = config.getfloat("DEFAULT", "mutation_likelihood_of_initial_memory_state")
         
 def save_table_to_file(table, filename):
-    with open(filename, "wb") as f:
+    with open(filename, "w") as f:
         writer = csv.writer(f)
         writer.writerows(table)
 

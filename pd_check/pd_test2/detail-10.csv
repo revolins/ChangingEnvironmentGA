@@ -1,0 +1,22 @@
+Bits,Decisions,Memory,Alive,Id,ParentId
+2,"[True, False, True, False]","[True, True]",0,[2],[None]
+2,"[True, False, True, False]","[False, False]",0,[3],[None]
+1,"[True, False]",[False],0,"[4, 4, 15, 4, 4, 15]","[None, None, 7, None, None, 7]"
+2,"[True, True, False, False]","[False, False]",0,[5],[None]
+1,"[False, False]",[True],0,"[6, 22, 28, 35]","[None, 16, 16, 26]"
+1,"[True, False]",[True],0,"[7, 11, 13, 7, 17]","[None, None, 6, None, 4]"
+2,"[True, True, False, False]","[True, False]",0,[8],[None]
+1,"[False, True]",[False],0,"[9, 9, 9, 9, 9, 9, 9, 9]","[None, None, None, None, None, None, None, None]"
+2,"[False, False, False, True]","[True, False]",0,[10],[None]
+1,"[True, True]",[False],0,[12],[9]
+2,"[True, True, True, False]","[False, False]",0,[14],[5]
+1,"[False, True]",[True],5,"[16, 16, 16, 16, 26, 16, 26, 16, 16, 16, 26, 16, 16, 26, 16, 26, 16, 26, 26, 16, 16, 26, 16, 26, 26, 26, 16, 26, 26, 26, 16, 26, 16, 16, 26, 26, 26, 16, 16, 26, 26, 26, 26, 26, 26, 26, 26]","[6, 6, 6, 6, 9, 6, 9, 6, 6, 6, 9, 6, 6, 9, 6, 9, 6, 9, 9, 6, 6, 9, 6, 9, 9, 9, 6, 9, 9, 9, 6, 9, 6, 6, 9, 9, 9, 6, 6, 9, 9, 9, 9, 9, 9, 9, 9]"
+2,"[False, True, False, True]","[True, False]",0,"[18, 18, 18, 18]","[10, 10, 10, 10]"
+2,"[False, True, False, True]","[True, True]",0,"[19, 19, 19, 19]","[16, 16, 16, 16]"
+1,"[True, True]",[True],4,"[20, 29, 30, 37, 38, 39, 40]","[7, 16, 26, 26, 26, 26, 26]"
+1,"[False, False]",[False],0,"[21, 21, 23, 21, 23, 23, 31]","[9, 9, 9, 9, 9, 9, 9]"
+2,"[False, True, False, False]","[True, False]",0,[24],[18]
+2,"[False, False, False, True]","[True, True]",0,"[25, 25, 25, 25, 25]","[19, 19, 19, 19, 19]"
+2,"[False, True, True, False]","[True, False]",0,[27],[24]
+2,"[False, False, False, False]","[True, True]",0,[32],[25]
+0,[False],[],1,"[33, 34, 36]","[16, 33, 26]"
