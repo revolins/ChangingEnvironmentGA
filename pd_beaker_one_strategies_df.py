@@ -5,12 +5,7 @@ import pandas
 import os
 import sys
 
-
-#increase size limit
 csv.field_size_limit(sys.maxsize)
-
-
-#empty list to store all data frames
 frames = []
 
 def make_strategy_dictionary(fileregx):
@@ -64,7 +59,7 @@ def make_strategy_dictionary(fileregx):
 
   #this is creating list of best common strategy
   common_one_strategy = [ (number_of_strategies[key][-1], key) for key in number_of_strategies]
-  common_one_strategy = max(common_one_strategy, key= lambda(x): x[0])[1]
+  common_one_strategy = max(common_one_strategy, key= lambda x: x[0])[1]
 
   #delete bad strats from main dictionary
   for key in failed_strategies:
@@ -106,8 +101,13 @@ for paths in glob.glob("/mnt/home/leasmika/ChangingEnvironmentGA/pdoutput2015_Ju
 
 strategies_df = pandas.concat(frames)
 
-most_common_file = file("most_common.csv", "wb")
-most_common_file.write(list_most_common)
+with open("most_common.csv", "wb") as most_common_file:
+    for item in list_most_common:
+        most_common_file.write(item.encode('utf-8') + b'\n')
+
+
+# most_common_file = file("most_common.csv", "wb") # Old File Writing
+# most_common_file.write(list_most_common)
 
 #strategies_df = make_strategy_dictionary("/mnt/home/leasmika/ChangingEnvironmentGA/pdoutput2015_June_23/pd-0.1_gen.ini_arr1_run0")
 #beaker.set('strategies_df', strategies_df) 
