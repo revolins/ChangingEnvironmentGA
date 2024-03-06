@@ -109,30 +109,36 @@ class HybridPDGenotype(object):
     temp file location for implementation
     """
 
-    def __init__(self, number_of_bits_of_memory, number_of_bits_of_summary, decision_list, initial_memory):
+    def __init__(self, number_of_bits_of_memory, number_of_bits_of_summary, decision_list, initial_memory, initial_summary):
         assert 0 <= number_of_bits_of_memory <= MAX_BITS_OF_MEMORY
+        print("Decision List Sanity Check")
+        print(len(decision_list))
+        print(2 ** number_of_bits_of_memory * (number_of_bits_of_summary + 1))
         assert len(decision_list) == 2 ** number_of_bits_of_memory * (number_of_bits_of_summary + 1)
         assert len(initial_memory) == number_of_bits_of_memory
         self.number_of_bits_of_memory = number_of_bits_of_memory
         self.number_of_bits_of_summary = number_of_bits_of_summary
         self.decision_list = decision_list
         self.initial_memory = initial_memory
+        self.initial_summary = initial_summary
     
     
     def __eq__(self, other):
         return (self.number_of_bits_of_memory == other.number_of_bits_of_memory and
                 self.number_of_bits_of_summary == other.number_of_bits_of_summary and
                 self.decision_list == other.decision_list and
-                self.initial_memory == other.initial_memory)
+                self.initial_memory == other.initial_memory and
+                self.initial_summary == other.initial_summary)
     
     def __ne__(self, other):
         return not self == other
     
     def __str__(self):
-        return "HybridPDGenotype({}, {}, {}, {})".format(self.number_of_bits_of_memory,
+        return "HybridPDGenotype({}, {}, {}, {}, {})".format(self.number_of_bits_of_memory,
                                                      self.number_of_bits_of_summary,
                                                      self.decision_list,
-                                                     self.initial_memory)
+                                                     self.initial_memory,
+                                                     self.initial_summary)
     
     def __repr__(self):
         return str(self)
@@ -141,7 +147,8 @@ class HybridPDGenotype(object):
         hashable_tuple = (self.number_of_bits_of_memory, 
             self.number_of_bits_of_summary,
             tuple(self.decision_list), 
-            tuple(self.initial_memory))
+            tuple(self.initial_memory),
+            tuple(self.initial_summary))
         return hash(hashable_tuple)
 
     def get_mutant_of_self(self):
@@ -149,6 +156,8 @@ class HybridPDGenotype(object):
         Determines when and how each type of mutation occurs.
         Returns new (mutated) genotype.
         """
+
+        #Mutant of Summary as well as Memory? Currently a mutant of just memory
         
         random_value = random.random()
         if random_value < MUTATION_LIKELIHOOD_OF_BITS_OF_MEMORY:
@@ -168,23 +177,26 @@ class HybridPDGenotype(object):
         if should_increase_memory:
             new_number_of_bits_of_memory = self.number_of_bits_of_memory + 1
             new_number_of_bits_of_summary = self.number_of_bits_of_summary + 1
-            new_decision_list = self.decision_list * 2 * (self.decision_list + 1)
+            new_decision_list = self.decision_list * 2 * (len(self.decision_list) + 1)
             new_initial_memory = self.initial_memory[:]
             new_initial_memory.append(random.choice([True,False]))
-            return HybridPDGenotype(new_number_of_bits_of_memory, new_number_of_bits_of_summary, new_decision_list, new_initial_memory)
+            new_initial_summary = self.initial_summary[:]
+            new_initial_summary.append(random.choice([True, False]))
+            return HybridPDGenotype(new_number_of_bits_of_memory, new_number_of_bits_of_summary, new_decision_list, new_initial_memory, new_initial_summary)
         # should decrease memory
         new_number_of_bits_of_memory = self.number_of_bits_of_memory - 1
-        new_number_of_bits_of_summary = self.number_of_bits_summary - 1
+        new_number_of_bits_of_summary = self.number_of_bits_of_summary - 1
         length_of_new_decision_list = len(self.decision_list) // 2 // len(self.decision_list) + 1
         new_decision_list = self.decision_list[:length_of_new_decision_list]
         new_initial_memory = self.initial_memory[:-1]
-        return HybridPDGenotype(new_number_of_bits_of_memory, new_number_of_bits_of_summary, new_decision_list, new_initial_memory) 
+        new_initial_summary = self.initial_summary[:-1]
+        return HybridPDGenotype(new_number_of_bits_of_memory, new_number_of_bits_of_summary, new_decision_list, new_initial_memory, new_initial_summary) 
         
     def _decision_list_mutant(self):
         mutation_location = random.randrange(len(self.decision_list))
         new_decision_list = self.decision_list[:]
         new_decision_list[mutation_location] = not new_decision_list[mutation_location]
-        return HybridPDGenotype(self.number_of_bits_of_memory, self.number_of_bits_of_summary, new_decision_list, self.initial_memory)
+        return HybridPDGenotype(self.number_of_bits_of_memory, self.number_of_bits_of_summary, new_decision_list, self.initial_memory, self.initial_summary)
         
     def _initial_memory_mutant(self):
         """
@@ -196,7 +208,8 @@ class HybridPDGenotype(object):
         mutation_location = random.randrange(len(self.initial_memory))
         new_initial_memory = self.initial_memory[:]
         new_initial_memory[mutation_location] = not new_initial_memory[mutation_location]
-        return HybridPDGenotype(self.number_of_bits_of_memory, self.number_of_bits_of_summary, self.decision_list, new_initial_memory)
+        new_initial_summary = self.initial_summary[:]
+        return HybridPDGenotype(self.number_of_bits_of_memory, self.number_of_bits_of_summary, self.decision_list, new_initial_memory, new_initial_summary)
 
 class PDOrg(object):
     """
@@ -310,13 +323,16 @@ def _create_random_genotype():
     Used by PDOrg as default returned genotype
     """
     number_of_bits_of_memory = random.randrange(MAX_BITS_OF_MEMORY + 1)
-    length = 2 ** number_of_bits_of_memory
+    number_of_bits_of_summary = random.randrange(MAX_BITS_OF_SUMMARY + 1)
+    length = 2 ** number_of_bits_of_memory * (number_of_bits_of_summary + 1)
     decision_list = [random.choice([True, False]) for _ in range(length)]
     initial_memory = [random.choice([True, False]) for _ in range(number_of_bits_of_memory)]
-    return MemoryPDGenotype(number_of_bits_of_memory, decision_list, initial_memory)
+    initial_summary = [random.choice([True, False]) for _ in range(number_of_bits_of_summary)]
+    return HybridPDGenotype(number_of_bits_of_memory, number_of_bits_of_summary, decision_list, initial_memory, initial_summary)
 
 
 MAX_BITS_OF_MEMORY = 1
+MAX_BITS_OF_SUMMARY = 1
 ALL_DEFECT = PDOrg(MemoryPDGenotype(0, [False], []))
 TIT_FOR_TAT = PDOrg(MemoryPDGenotype(1, [False, True], [True]))
 COIN_FLIP = PDStochasticOrg()
