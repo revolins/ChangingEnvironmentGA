@@ -114,14 +114,14 @@ class HybridPDGenotype(object):
         assert len(decision_list) == 2 ** number_of_bits_of_memory * (number_of_bits_of_summary + 1)
         assert len(initial_memory) == number_of_bits_of_memory
         self.number_of_bits_of_memory = number_of_bits_of_memory
-        self.numbers_of_bits_summary = number_of_bits_of_summary
+        self.number_of_bits_of_summary = number_of_bits_of_summary
         self.decision_list = decision_list
         self.initial_memory = initial_memory
     
     
     def __eq__(self, other):
         return (self.number_of_bits_of_memory == other.number_of_bits_of_memory and
-                self.number_of_bits_of_summary == other.numbers_of_bits_of_summary and
+                self.number_of_bits_of_summary == other.number_of_bits_of_summary and
                 self.decision_list == other.decision_list and
                 self.initial_memory == other.initial_memory)
     
@@ -130,7 +130,7 @@ class HybridPDGenotype(object):
     
     def __str__(self):
         return "HybridPDGenotype({}, {}, {}, {})".format(self.number_of_bits_of_memory,
-                                                     self.numbers_of_bits_summary,
+                                                     self.number_of_bits_of_summary,
                                                      self.decision_list,
                                                      self.initial_memory)
     
@@ -160,21 +160,21 @@ class HybridPDGenotype(object):
 
     def _get_bits_of_memory_mutant(self):
         should_increase_memory = random.choice([True, False])
-        if self.number_of_bits_of_memory == 0 and self.numbers_of_bits_summary == 0 and not should_increase_memory:
+        if self.number_of_bits_of_memory == 0 and self.number_of_bits_of_summary == 0 and not should_increase_memory:
             return self
         if self.number_of_bits_of_memory == MAX_BITS_OF_MEMORY and should_increase_memory:
             #Return full normal memory but hybrid relies on 2*k * (j+1)
             return self
         if should_increase_memory:
             new_number_of_bits_of_memory = self.number_of_bits_of_memory + 1
-            new_number_of_bits_of_summary = self.numbers_of_bits_summary + 1
+            new_number_of_bits_of_summary = self.number_of_bits_of_summary + 1
             new_decision_list = self.decision_list * 2 * (self.decision_list + 1)
             new_initial_memory = self.initial_memory[:]
             new_initial_memory.append(random.choice([True,False]))
             return HybridPDGenotype(new_number_of_bits_of_memory, new_number_of_bits_of_summary, new_decision_list, new_initial_memory)
         # should decrease memory
         new_number_of_bits_of_memory = self.number_of_bits_of_memory - 1
-        new_number_of_bits_of_summary = self.numbers_of_bits_summary - 1
+        new_number_of_bits_of_summary = self.number_of_bits_summary - 1
         length_of_new_decision_list = len(self.decision_list) // 2 // len(self.decision_list) + 1
         new_decision_list = self.decision_list[:length_of_new_decision_list]
         new_initial_memory = self.initial_memory[:-1]
@@ -184,7 +184,7 @@ class HybridPDGenotype(object):
         mutation_location = random.randrange(len(self.decision_list))
         new_decision_list = self.decision_list[:]
         new_decision_list[mutation_location] = not new_decision_list[mutation_location]
-        return HybridPDGenotype(self.number_of_bits_of_memory, self.numbers_of_bits_summary, new_decision_list, self.initial_memory)
+        return HybridPDGenotype(self.number_of_bits_of_memory, self.number_of_bits_of_summary, new_decision_list, self.initial_memory)
         
     def _initial_memory_mutant(self):
         """
@@ -196,7 +196,7 @@ class HybridPDGenotype(object):
         mutation_location = random.randrange(len(self.initial_memory))
         new_initial_memory = self.initial_memory[:]
         new_initial_memory[mutation_location] = not new_initial_memory[mutation_location]
-        return HybridPDGenotype(self.number_of_bits_of_memory, self.numbers_of_bits_summary, self.decision_list, new_initial_memory)
+        return HybridPDGenotype(self.number_of_bits_of_memory, self.number_of_bits_of_summary, self.decision_list, new_initial_memory)
 
 class PDOrg(object):
     """
