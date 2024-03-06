@@ -110,10 +110,12 @@ class HybridPDGenotype(object):
     """
 
     def __init__(self, number_of_bits_of_memory, number_of_bits_of_summary, decision_list, initial_memory, initial_summary):
+        print("CURRENT NUMBER OF BITS OF MEMORY")
+        print(number_of_bits_of_memory)
         assert 0 <= number_of_bits_of_memory <= MAX_BITS_OF_MEMORY
-        print("Decision List Sanity Check")
-        print(len(decision_list))
-        print(2 ** number_of_bits_of_memory * (number_of_bits_of_summary + 1))
+        # print("Decision List Sanity Check")
+        # print(len(decision_list))
+        # print(2 ** number_of_bits_of_memory * (number_of_bits_of_summary + 1))
         assert len(decision_list) == 2 ** number_of_bits_of_memory * (number_of_bits_of_summary + 1)
         assert len(initial_memory) == number_of_bits_of_memory
         self.number_of_bits_of_memory = number_of_bits_of_memory
@@ -171,22 +173,25 @@ class HybridPDGenotype(object):
         should_increase_memory = random.choice([True, False])
         if self.number_of_bits_of_memory == 0 and self.number_of_bits_of_summary == 0 and not should_increase_memory:
             return self
-        if self.number_of_bits_of_memory == MAX_BITS_OF_MEMORY and should_increase_memory:
+        if self.number_of_bits_of_memory == MAX_BITS_OF_MEMORY and self.number_of_bits_of_summary == MAX_BITS_OF_SUMMARY and should_increase_memory:
             #Return full normal memory but hybrid relies on 2*k * (j+1)
             return self
         if should_increase_memory:
             new_number_of_bits_of_memory = self.number_of_bits_of_memory + 1
             new_number_of_bits_of_summary = self.number_of_bits_of_summary + 1
-            new_decision_list = self.decision_list * 2 * (len(self.decision_list) + 1)
+            new_decision_list = 2 ** self.decision_list * (len(self.decision_list) + 1)
             new_initial_memory = self.initial_memory[:]
             new_initial_memory.append(random.choice([True,False]))
             new_initial_summary = self.initial_summary[:]
             new_initial_summary.append(random.choice([True, False]))
             return HybridPDGenotype(new_number_of_bits_of_memory, new_number_of_bits_of_summary, new_decision_list, new_initial_memory, new_initial_summary)
         # should decrease memory
+        # Current bug, decreasing memory out of order? Unlikely
+        # length of decision list causes cascading issues after generations? More likely
+        # Slicing necessary for summary and memory? Unlikely
         new_number_of_bits_of_memory = self.number_of_bits_of_memory - 1
         new_number_of_bits_of_summary = self.number_of_bits_of_summary - 1
-        length_of_new_decision_list = len(self.decision_list) // 2 // len(self.decision_list) + 1
+        length_of_new_decision_list = (2 // len(self.decision_list)) // (len(self.decision_list) + 1)
         new_decision_list = self.decision_list[:length_of_new_decision_list]
         new_initial_memory = self.initial_memory[:-1]
         new_initial_summary = self.initial_summary[:-1]
