@@ -1,61 +1,27 @@
-#Changing Environments
-This project will observe the relative improvement in fitness of a digital organism moved from its natural environment to a new one, and them back.
+# Measuring Selective Pressures for Increased Memory Value in Iterated Prisoner’s Dilemma
+This project quantifies the effect of noisy opponents on average memory length in an evolving population of IPD strategies. 
 
-##Researchers:
-Riley Annis, Josh Nahum, Emily Dolson
+## Researchers:
+Karen Suzue, Alec Said, Jay Revolinsky
 
-##Dependencies:
-Numpy, Scipy, Cython
+# We assume that the user has anaconda/miniconda installed
+https://docs.anaconda.com/free/miniconda/miniconda-install/
 
-###Necessary Files:
-changing_environments_ga.py
-main.py
-fitness_function.pyx
-cpp_fitness_function.cpp
-string_org.py
-real_value_vector_org.py
-bit_vector_org.py
+# Build Environment
+```
+conda env create -f environment.yml
+```
 
-###Config File Arguenments:
-* Necessary for all types:
-  * org_type
-  * number_of_organisms
-  * mutation_rate
-  * number_of_generations
-  * tournament_size
-  * verbose
-* Necessary for string orgs:
-  * target_string
-  * letters
-* Necessary for real value vector orgs:
-  * fitness_function_type
-  * crowding
-  * range_minimum
-  * range_maximum
-  * mutation_effect_size
-  * alternate_environment_corr
-  * length
-* Necessary for bit vector orgs:
-  * length
+# Startup Environmnet
+```
+conda activate memGA
+```
 
-###changing_environments_ga.py Command Line Arguements:
+# Example Run Command
+```
+python changing_environment_ga.py -c config/quick_test.ini -o output_test
+```
+
+# Command Line Arguments
 * -c  config file location
 * -o  desired output directory
-
-###Use With String Orgs:
-Not used, possibly broken.
-
-###Use With Real Value Vector Orgs:
-I'll get to this soon, I promise.
-
-###Use With Bit Vector Orgs (Static Environment):
-* Constant:
-  * LENGTH
-* Class:
-  * BitVectorOrg
-* Methods:
-  * fitness(environment)
-  * is_better_than(other_org, environment)
-  * get_mutant()
-* Function:
-  * fitness_function(genotype)
