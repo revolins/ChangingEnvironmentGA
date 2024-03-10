@@ -1,3 +1,7 @@
+"""
+This module contains methods to evolve IPD strategies. 
+"""
+
 #!/usr/bin/python
 
 from __future__ import division
@@ -129,19 +133,23 @@ def pd_evolve_population():
         headers.append("Organisms With " + str(i) + " Bits of Memory")
     output.append(headers)
     for org in organisms:
-    #adding into the dictionary
+    # Adding into the dictionary
         if org in past_organisms:
             past_organisms[org].append(org)
         else:
             past_organisms[org] = [org]
-        
+
+    # Create detail file for generation 0  
     pd_make_detail_file.make_file_detail(organisms, past_organisms, 0, OUTPUT_FOLDER)
     
-    for i in range(NUMBER_OF_GENERATIONS):       
-        if SELECTION_BY_STATIC_COMPETITOR: # Static Mode
+    for i in range(NUMBER_OF_GENERATIONS):
+        # Static Mode       
+        if SELECTION_BY_STATIC_COMPETITOR: 
             organisms = pd_selection.get_next_generation_by_static_payout(organisms)
-        else: # Coevolutionary Mode
+        # Coevolutionary Mode
+        else: 
             organisms = pd_selection.get_next_generation_by_selection(organisms)
+
         organisms = get_mutated_population(organisms)
         output.append(pd_analysis.get_tally_of_number_of_bits_of_memory(organisms))
 

@@ -1,5 +1,5 @@
 import unittest
-import old_fitness_function as ff
+import OLD.old_fitness_function as ff
 
 class TestFitnessFunction(unittest.TestCase):
     

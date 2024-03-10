@@ -19,7 +19,7 @@ conda activate memGA
 
 # Example Run Command
 ```
-python changing_environment_ga.py -c config/quick_test.ini -o output_test
+python changing_environment_ga.py -c config/pd_config.ini -o pd_test
 ```
 
 # Command Line Arguments

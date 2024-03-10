@@ -1,7 +1,7 @@
 import unittest
 import main
-import string_org as so
-import real_value_vector_org as rvvo
+import OLD.string_org as so
+import OLD.real_value_vector_org as rvvo
 
 class TestMain(unittest.TestCase):
     """Testing main.py"""

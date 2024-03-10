@@ -6,8 +6,11 @@ from string import ascii_uppercase
 import time 
 
 def parse_everything(command_line_args=None):
+    """Parse command line arguments"""
     conf_parser = argparse.ArgumentParser(
         description='The changing environments program.')
+    
+    # Expects 2 arguments: config file & output folder
     conf_parser.add_argument("-c", "--config_file", nargs=1)
     conf_parser.add_argument("-o", "--output_folder", nargs=1)
     
@@ -16,9 +19,11 @@ def parse_everything(command_line_args=None):
     output_folder = args.output_folder[0]
     config_file = args.config_file[0]
 
+    # Read contents of config file
     config = configparser.ConfigParser()
-    config.read([config_file])
-    config.set("DEFAULT", "config_file", config_file)
+    config.read([config_file]) 
+    # Set paths to config file and output folder as additional settings
+    config.set("DEFAULT", "config_file", config_file) 
     config.set("DEFAULT", "output_folder", output_folder)
     
     config.set("DEFAULT", "start_time", str(time.time()))

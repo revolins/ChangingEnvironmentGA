@@ -1,6 +1,6 @@
 import unittest
-import old_real_value_vector_org as rvvo #Original vectors
-import real_value_vector_org as arr #New arrays
+import OLD.old_real_value_vector_org as rvvo #Original vectors
+import OLD.real_value_vector_org as arr #New arrays
 
 class TestVectorOrgVsArrayOrg(unittest.TestCase):
     """Testing old_real_value_vector_org.py against real_value_vector_org.py"""

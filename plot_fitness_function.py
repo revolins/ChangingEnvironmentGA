@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib import mlab
 from mpl_toolkits.mplot3d import Axes3D
-from old_fitness_function import *
+from OLD.old_fitness_function import *
 import numpy as np
 
 def main():
