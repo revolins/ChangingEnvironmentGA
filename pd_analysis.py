@@ -1,3 +1,9 @@
+"""
+This module calculates, for each generation, the count of organisms 
+with memory lengths spanning from 0 to MAX_BITS_OF_MEMORY + 1. 
+The resulting data is recorded in a file named "bits_of_memory_overtime.csv."
+"""
+
 import pd_org
 
 def get_tally_of_number_of_bits_of_memory(organisms):

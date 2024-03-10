@@ -124,6 +124,7 @@ def print_status(generation, population, environment):
 
 def pd_evolve_population():
     """Evolution loop for PD org representation"""
+    # We need past organisms for parent data
     past_organisms = {}
     
     organisms = create_initial_population()
@@ -132,6 +133,7 @@ def pd_evolve_population():
     for i in range(pd_org.MAX_BITS_OF_MEMORY + 1):
         headers.append("Organisms With " + str(i) + " Bits of Memory")
     output.append(headers)
+
     for org in organisms:
     # Adding into the dictionary
         if org in past_organisms:
@@ -149,7 +151,7 @@ def pd_evolve_population():
         # Coevolutionary Mode
         else: 
             organisms = pd_selection.get_next_generation_by_selection(organisms)
-
+        # Mutate populataion
         organisms = get_mutated_population(organisms)
         output.append(pd_analysis.get_tally_of_number_of_bits_of_memory(organisms))
 
