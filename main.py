@@ -1,15 +1,13 @@
 #!/usr/bin/python
-"""
-Riley's first research project.
-"""
+
 from __future__ import division
 import random
 from string import ascii_uppercase
 import csv
-import string_org
-import real_value_vector_org
+import OLD.string_org as string_org
+import OLD.real_value_vector_org as real_value_vector_org
 import scipy.stats as stats
-import old_fitness_function as ff
+import OLD.old_fitness_function as ff
 from math import floor
 import os
 import shutil
@@ -30,9 +28,9 @@ TOURNAMENT_SIZE = None
 VERBOSE = False
 ALTERNATE_ENVIRONMENT_CORR = None
 START_TIME = None
-CROWDING = False
+CROWDING = False # True to activate Crowding Selection
 OUTPUT_FREQUENCY = None
-SELECTION_BY_STATIC_COMPETITOR = False
+SELECTION_BY_STATIC_COMPETITOR = False # True to activate static environment
 
 def create_initial_population():
     """
@@ -46,7 +44,6 @@ def get_mutated_population(population):
     """
     Return a new population with a percentage of organisms mutated based on the mutation rate.
     """
-    
     new_population = []
     for org in population:
         if random.random() < MUTATION_RATE:
@@ -56,6 +53,7 @@ def get_mutated_population(population):
             new_population.append(org)
     return new_population
 
+# OBSOLETE
 def get_selected_population(population, environment):
     """
     Select a number of organisms based on tournament size, pick the best one, and append it to
@@ -67,13 +65,22 @@ def get_selected_population(population, environment):
         new_population.append(get_best_organism(orgs, environment))
     return new_population
 
+# OBSOLETE
 def get_crowded_population(mutated_population, old_population, environment):
+    """
+    Crowding selection to preserve diversity and prevent premature convergence.
+    Compare each organism in the mutated population against another similar organism
+    from the old population and decide which of the two will survive. 
+    Returns a new population.
+    """
     new_population = []
     for org in mutated_population:
-        sample = [random.choice(old_population) for _ in range(TOURNAMENT_SIZE)]
+        # Tournament-sized sample of random organisms from the old population
+        sample = [random.choice(old_population) for _ in range(TOURNAMENT_SIZE)] 
         new_population.append(get_best_crowded_organism(org, sample, environment))
     return new_population
 
+# OBSOLETE
 def get_best_organism(pop, environment):
     """Gets the best org in a given population"""
     best_org = pop[0]
@@ -82,7 +89,9 @@ def get_best_organism(pop, environment):
             best_org = org
     return best_org
 
+# OBSOLETE
 def get_best_crowded_organism(new_org, sample, environment):
+    """Find the organism most similar to new_org in a given sample, return the better organism"""
     most_similar = sample[0]
     min_distance = float("inf")
     for org in sample:
@@ -90,16 +99,17 @@ def get_best_crowded_organism(new_org, sample, environment):
         if curr_dist < min_distance:
             most_similar = org
             min_distance = curr_dist
-    if new_org.is_better_than(most_similar, environment):
+    if new_org.is_better_than(most_similar, environment): 
         return new_org
     return most_similar
 
+# OBSOLETE
 def get_next_generation(population, environment):
     """Get a mutated population, then get a selected population from it"""
     new_population = get_mutated_population(population)
-    if CROWDING:
+    if CROWDING: # Crowding selection
         new_new_population = get_crowded_population(new_population, population, environment)
-    else:
+    else: # Tournament selection
         new_new_population = get_selected_population(new_population, environment)
     return new_new_population
 
@@ -109,6 +119,7 @@ def print_status(generation, population, environment):
     print("Gen = {}  Pop = {}  Fit = {}".format(generation, population, average_fitness))
 
 def pd_evolve_population():
+    """Evolution loop for pd_org representation"""
     past_organisms = {}
     
     organisms = create_initial_population()
@@ -127,9 +138,9 @@ def pd_evolve_population():
     pd_make_detail_file.make_file_detail(organisms, past_organisms, 0, OUTPUT_FOLDER)
     
     for i in range(NUMBER_OF_GENERATIONS):       
-        if SELECTION_BY_STATIC_COMPETITOR:
+        if SELECTION_BY_STATIC_COMPETITOR: # Static Mode
             organisms = pd_selection.get_next_generation_by_static_payout(organisms)
-        else:
+        else: # Coevolutionary Mode
             organisms = pd_selection.get_next_generation_by_selection(organisms)
         organisms = get_mutated_population(organisms)
         output.append(pd_analysis.get_tally_of_number_of_bits_of_memory(organisms))
@@ -145,8 +156,9 @@ def pd_evolve_population():
 
     return output
 
+# OBSOLETE
 def evolve_population(reference_environment, alternative_environment):
-    """Evolve a population!"""
+    """Evolve loop for other types of genome representation"""
     #Set up the output lists
     current_fitness_list = [("Generation", "Average_Fitness", 
                     "Standard_Deviation")]
@@ -210,13 +222,16 @@ def get_average_fitness(pop, environment):
 
 
 def set_global_variables(config):
-    """Sets all the global variables based on the config file"""
+    """Sets all the global variables based on a config file"""
+    # Added to config file from command line
     global OUTPUT_FOLDER
     OUTPUT_FOLDER = config.get("DEFAULT", "output_folder")
     global CONFIG_FILE
     CONFIG_FILE = config.get("DEFAULT", "config_file")
     global START_TIME
     START_TIME = config.getfloat("DEFAULT", "start_time")
+
+    # Pre-specified config file
     global VERBOSE
     VERBOSE = config.getboolean("DEFAULT", "verbose")
     global NUMBER_OF_ORGANISMS
@@ -229,13 +244,14 @@ def set_global_variables(config):
     MUTATION_RATE = config.getfloat("DEFAULT", "mutation_rate")
     global OUTPUT_FREQUENCY
     OUTPUT_FREQUENCY = config.getint("DEFAULT", "output_frequency")
-    if ORG_TYPE != "pd":
+
+    if ORG_TYPE != "pd": # OBSOLETE
         global TOURNAMENT_SIZE
         TOURNAMENT_SIZE = config.getint("DEFAULT", "tournament_size")    
-    if ORG_TYPE == "string":
+    if ORG_TYPE == "string": # OBSOLETE
         string_org.TARGET_STRING = config.get("DEFAULT", "target_string")
         string_org.LETTERS = config.get("DEFAULT", "letters")
-    elif ORG_TYPE == "vector":
+    elif ORG_TYPE == "vector": # OBSOLETE
         fitness_function_type_str = config.get("DEFAULT", "fitness_function_type")
         global FITNESS_FUNCTION_TYPE
         if fitness_function_type_str == "flat":
@@ -265,6 +281,7 @@ def set_global_variables(config):
             "DEFAULT", "alternate_environment_corr")
         global CROWDING
         CROWDING = eval(config.get("DEFAULT", "crowding"))
+
     elif ORG_TYPE == "pd":
         global SELECTION_BY_STATIC_COMPETITOR
         SELECTION_BY_STATIC_COMPETITOR = config.getboolean("DEFAULT", "selection_by_static_competitor")
@@ -281,16 +298,19 @@ def set_global_variables(config):
         pd_org.MUTATION_LIKELIHOOD_OF_INITIAL_MEMORY_STATE = config.getfloat("DEFAULT", "mutation_likelihood_of_initial_memory_state")
         
 def save_table_to_file(table, filename):
+    """Write a table to a file"""
     with open(filename, "w") as f:
         writer = csv.writer(f)
         writer.writerows(table)
 
 def save_string_to_file(string, filename):
+    """Write a string to a file"""
     with open(filename, "w") as f:
         f.write(string)
 
 def generate_data():
     """The main function; generates all the data"""
+    # Create output folder, place copy of config file inside
     if os.path.exists(OUTPUT_FOLDER):
         raise IOError("output_folder: {} already exists".format(OUTPUT_FOLDER))
     os.makedirs(OUTPUT_FOLDER)
@@ -302,42 +322,38 @@ def generate_data():
     config_dest = os.path.join(OUTPUT_FOLDER, config_filename)
     shutil.copyfile(CONFIG_FILE, config_dest)
 
-    if ORG_TYPE == "vector":
+    if ORG_TYPE == "vector": # OBSOLETE
         fitness_function = ff.Fitness_Function(FITNESS_FUNCTION_TYPE, real_value_vector_org.LENGTH)
         fitness_function.create_fitness2(ALTERNATE_ENVIRONMENT_CORR)
         reference_environment = fitness_function.fitness1_fitness
         alternative_environment = fitness_function.fitness2_fitness
-    elif ORG_TYPE == "string":
+    elif ORG_TYPE == "string": # OBSOLETE
         reference_environment = string_org.default_environment
         alternative_environment = string_org.hash_environment
-        
-    if ORG_TYPE != "pd":
+    if ORG_TYPE != "pd": # OBSOLETE
         experienced_fits, experienced_bests, reference_fits, reference_bests = evolve_population(
         reference_environment, alternative_environment)
 
     if ORG_TYPE == "pd":
         output = pd_evolve_population()
-        
-       
-    if ORG_TYPE == "pd":
         output_filename = join_path("bits_of_memory_overtime.csv")
         save_table_to_file(output, output_filename)
-        
-        
-    else:
-        experienced_filename = join_path("experienced_fitnesses.csv")
-        reference_filename = join_path("reference_fitnesses.csv")
-        experienced_best_filename = join_path("experienced_best_fitnesses.csv")
-        reference_best_filename = join_path("reference_best_fitnesses.csv")
-        corr_filename = join_path("correlation.dat")
+
+    # What's going on here??
+    # else:
+    #     experienced_filename = join_path("experienced_fitnesses.csv")
+    #     reference_filename = join_path("reference_fitnesses.csv")
+    #     experienced_best_filename = join_path("experienced_best_fitnesses.csv")
+    #     reference_best_filename = join_path("reference_best_fitnesses.csv")
+    #     corr_filename = join_path("correlation.dat")
    
 
-        save_table_to_file(experienced_fits, experienced_filename)
-        save_table_to_file(experienced_bests, experienced_best_filename)
-        save_table_to_file(reference_fits, reference_filename)
-        save_table_to_file(reference_bests, reference_best_filename)
-        if ORG_TYPE == "vector":
-            save_string_to_file(str(fitness_function.correlation()), corr_filename)
+    #     save_table_to_file(experienced_fits, experienced_filename)
+    #     save_table_to_file(experienced_bests, experienced_best_filename)
+    #     save_table_to_file(reference_fits, reference_filename)
+    #     save_table_to_file(reference_bests, reference_best_filename)
+    #     if ORG_TYPE == "vector":
+    #         save_string_to_file(str(fitness_function.correlation()), corr_filename)
     time_filename = join_path("time.dat")     
     start_time = datetime.datetime.fromtimestamp(START_TIME)
     end_time = datetime.datetime.now()
