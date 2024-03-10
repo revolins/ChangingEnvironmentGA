@@ -79,7 +79,7 @@ def make_strategy_dictionary(fileregx):
 list_most_common = "Common_Strategy, Condition\n"
 
 values_do_not_want = ['pd--1.0_', 'pd-0.3_', 'pd-0.2_', 'pd-0.1_', 'pd-0.0_', 'pd--0.5_', 'pd-0.4_', 'pd-0.5_', 'pd-1.0_', 'pd-7.0_']
-for paths in glob.glob("/mnt/home/leasmika/ChangingEnvironmentGA/pdoutput2015_July_02selection_by_static_competitor/*"):
+for paths in glob.glob("pdoutput2015_July_02selection_by_static_competitor/*"):
   if any(filter(lambda x: x in paths, values_do_not_want)):
     continue
   if (os.path.isdir(paths)):

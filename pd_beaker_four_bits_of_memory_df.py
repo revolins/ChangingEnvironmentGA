@@ -8,10 +8,11 @@ from statsmodels.stats.multicomp import pairwise_tukeyhsd, MultiComparison
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning) #For those pesky deprecation warnings
 
-
 bits_of_memory_df = pd.read_csv("all_bits_df_static_comp_more_values.csv")
 bits_of_memory_df.replace([np.inf, -np.inf], np.nan, inplace=True)
+print(bits_of_memory_df.columns.tolist())
 bits_of_memory_df.columns = ['Row_Label', 'B0', 'B1', 'B2', 'B3', 'B4', 'Condition', 'Generation']
+print(bits_of_memory_df.columns.tolist())
 bits_of_memory_df.drop(['Row_Label'], axis=1, inplace=True)
 bits_of_memory_df['Generation'] = pd.to_numeric(bits_of_memory_df['Generation'], errors='coerce')
 bits_of_memory_df['Condition'] = pd.Categorical(pd.to_numeric(bits_of_memory_df['Condition'], errors='coerce'))
@@ -26,7 +27,8 @@ summary_df = bits_of_memory_df.groupby(['Condition', 'Generation'], observed=Tru
     group_sd=('Mean', 'std')
 ).reset_index()
 
-sns.lineplot(data=summary_df, x='Generation', y='group_mean', hue='Condition', palette='muted')
+plt.figure(figsize=(10, 6))
+sns.lineplot(data=summary_df, x='Generation', y='group_mean', hue='Condition', style='Condition', markers=True, dashes=False, err_style="band", ci='sd')
 plt.fill_between(data=summary_df, x='Generation', y1=summary_df['group_mean'] - summary_df['group_sd'], y2=summary_df['group_mean'] + summary_df['group_sd'], alpha=0.3)
 plt.title('Average Bits of Memory Over Time')
 plt.ylabel('Average Bits of Memory')
@@ -34,13 +36,15 @@ plt.grid(False)
 plt.savefig('Average_Bits_Memory_Overtime_Static_Comp.pdf')
 
 filtered_df = summary_df[summary_df['Condition'].isin([0, 0.01, 0.03, 0.05, 0.075])]
-sns.lineplot(data=filtered_df, x='Generation', y='group_mean', hue='Condition') #, palette=['#F5828C', '#8CF582', '#82F5EB', '#828BF5'] # Palette for when we have 4 samples
+plt.figure(figsize=(10, 6))
+sns.lineplot(data=filtered_df, x='Generation', y='group_mean', hue='Condition', style='Condition', markers=True, dashes=False, err_style="band", ci='sd') #, palette=['#F5828C', '#8CF582', '#82F5EB', '#828BF5'] # Palette for when we have 4 samples
 plt.fill_between(data=filtered_df, x='Generation', y1=filtered_df['group_mean'] - filtered_df['group_sd'], y2=filtered_df['group_mean'] + filtered_df['group_sd'], alpha=0.3)
 plt.title('Average Bits of Memory Over Time (Restricted Conditions)')
 plt.ylabel('Average Bits of Memory')
 plt.grid(False)
 plt.savefig('Average_Bits_Memory_Overtime_Restricted_Static_Comp.pdf')
 
+plt.figure(figsize=(10, 6))
 plt.hist(bits_of_memory_df['Mean'], bins=30)
 plt.title('Distribution of Mean Bits of Memory')
 plt.xlabel('Mean Bits of Memory')
