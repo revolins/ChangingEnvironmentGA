@@ -51,16 +51,16 @@ plt.xlabel('Mean Bits of Memory')
 plt.ylabel('Frequency')
 plt.savefig('Mean_Bits_Memory_Distribution_Check.png')
 
-# anova_results = stats.f_oneway(*[group['Mean'].values for name, group in bits_of_memory_df.groupby('Condition', observed=True)])
-# print(f'ANOVA test results: {anova_results}')
+anova_results = stats.f_oneway(*[group['Mean'].values for name, group in bits_of_memory_df.groupby('Condition', observed=True)])
+print(f'ANOVA test results: {anova_results}')
 
-# tukey_results = pairwise_tukeyhsd(bits_of_memory_df['Mean'], bits_of_memory_df['Condition'])
-# print(tukey_results)
+tukey_results = pairwise_tukeyhsd(bits_of_memory_df['Mean'], bits_of_memory_df['Condition'])
+print(tukey_results)
 
-# kruskal_data = bits_of_memory_df[bits_of_memory_df['Generation'] == 499]
-# kruskal_results = stats.kruskal(*[group['Mean'].values for name, group in kruskal_data.groupby('Condition', observed=True)])
-# print(f'Kruskal-Wallis test results: {kruskal_results}')
+kruskal_data = bits_of_memory_df[bits_of_memory_df['Generation'] == 499]
+kruskal_results = stats.kruskal(*[group['Mean'].values for name, group in kruskal_data.groupby('Condition', observed=True)])
+print(f'Kruskal-Wallis test results: {kruskal_results}')
 
-# comparison = MultiComparison(kruskal_data['Mean'], kruskal_data['Condition'])
-# wilcox_results = comparison.allpairtest(stats.mannwhitneyu, method='bonferroni')
-# print(wilcox_results[0])
+comparison = MultiComparison(kruskal_data['Mean'], kruskal_data['Condition'])
+wilcox_results = comparison.allpairtest(stats.mannwhitneyu, method='bonferroni')
+print(wilcox_results[0])

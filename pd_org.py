@@ -121,8 +121,8 @@ class HybridPDGenotype(object):
     """
 
     def __init__(self, number_of_bits_of_memory, number_of_bits_of_summary, decision_list, initial_memory, initial_summary):
-        print("CURRENT NUMBER OF BITS OF MEMORY")
-        print(number_of_bits_of_memory)
+        # print("CURRENT NUMBER OF BITS OF MEMORY")
+        # print(number_of_bits_of_memory)
         assert 0 <= number_of_bits_of_memory <= MAX_BITS_OF_MEMORY
         # print("Decision List Sanity Check")
         # print(len(decision_list))

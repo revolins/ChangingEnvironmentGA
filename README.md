@@ -22,6 +22,11 @@ conda activate memGA
 python changing_environment_ga.py -c config/pd_config.ini -o pd_test
 ```
 
+# Kruskal-Wallis Test
+```
+python test_mem.py
+```
+
 # Command Line Arguments
 * -c  config file location
 * -o  desired output directory
