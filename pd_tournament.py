@@ -121,7 +121,6 @@ def get_static_payouts(organisms, static_competitors):
     """
     Get average payouts for orgs in static competitions
     """
-
     for org in organisms:
         org.average_payout = get_static_fitness(org, static_competitors)
 
@@ -129,7 +128,6 @@ def get_static_fitness(org, static_competitors):
     """
     Gets fitness for orgs in static competitions
     """
-    
     payouts = [adjusted_payout(org, comp)[0] for comp in static_competitors]
 
     return sum(payouts) / (len(payouts) * 1.0)
