@@ -5,6 +5,8 @@ Detail files contain information on each PD org within a generation.
 
 import csv
 
+# TODO: make sure this is compatible with new hybrid memory model
+
 # Master function to call all the helpers
 def make_file_detail(organisms, past_organisms, current_generation, filepath):
     """
