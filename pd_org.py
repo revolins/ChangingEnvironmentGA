@@ -320,9 +320,9 @@ class PDOrg(object):
         self.memory.popleft()   
         
     def initialize_memory(self):
-        """Initialize memory by looking at genotype"""
-        # TODO: add summary memory 
-        self.memory = deque(self.genotype.initial_memory)
+        """Get double-ended queue memory"""
+        # TODO: add summary memory
+        self.memory = deque(self.genotype.initial_memory) # makes a copy
         
     def fitness(self, environment):
         raise NotImplementedError()
