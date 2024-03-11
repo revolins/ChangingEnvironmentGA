@@ -332,6 +332,8 @@ class PDOrg(object):
         
 class PDStochasticOrg(PDOrg):
     """
+    This class creates a PD stochastic organism.
+    So far, only for COIN FLIP/random type opponents in static environment
     """
     next_org_id = 0
 
@@ -382,6 +384,7 @@ def _create_random_genotype():
     return HybridPDGenotype(number_of_bits_of_memory, number_of_bits_of_summary, decision_list, initial_memory, initial_summary)
 
 
+# Probably parameters for fixed opponent strategies in Static Mode
 MAX_BITS_OF_MEMORY = 1
 MAX_BITS_OF_SUMMARY = 1
 
