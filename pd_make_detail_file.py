@@ -33,14 +33,13 @@ def make_file_detail(organisms, past_organisms, current_generation, filepath):
     data = []
     
     # Iterate through everything in dictionary
-    # You need past_organisms for parents info
     for key in past_organisms:
         row = []
         row.append(key.genotype.number_of_bits_of_memory)
         row.append(key.genotype.decision_list)
         row.append(key.genotype.initial_memory)
 
-        # Number of orgs alive goes here
+        # Count number of organisms alive with the same strategy
         number_alive = 0
         for org in organisms:
             if hash(key) == hash(org):
@@ -57,9 +56,3 @@ def make_file_detail(organisms, past_organisms, current_generation, filepath):
         writer.writerow(header)
         writer.writerows(data)
 
-
-    
-    
-
-    
-    

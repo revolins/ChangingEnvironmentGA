@@ -43,19 +43,22 @@ class MemoryPDGenotype(object):
         return not self == other
     
     def __str__(self):
-        """"""
+        """String representation"""
         return "MemoryPDGenotype({}, {}, {})".format(self.number_of_bits_of_memory,
                                                      self.decision_list,
                                                      self.initial_memory)
     
     def __repr__(self):
+        """In this case, the same as __str__"""
         return str(self)
         
     def __hash__(self):
+        """Overload hash operator, necessary for dictionaries and such"""
+        # Convert decision list and initial (specific) memory into immutable tuples
         hashable_tuple = (self.number_of_bits_of_memory, 
             tuple(self.decision_list), 
-            tuple(self.initial_memory))
-        return hash(hashable_tuple)
+            tuple(self.initial_memory)) # We don't consider IDs
+        return hash(hashable_tuple) 
 
     def get_mutant_of_self(self):
         """

@@ -123,25 +123,37 @@ def print_status(generation, population, environment):
     print("Gen = {}  Pop = {}  Fit = {}".format(generation, population, average_fitness))
 
 def pd_evolve_population():
-    """Evolution loop for PD org representation"""
-    # We need past organisms for parent data
+    """
+    Evolution loop for PD org representation
+    Returns data for "bits_of_memory_overtime.csv"
+    """
+    # A dictionary containing all past strategies evolved along the way
     past_organisms = {}
-    
+
+    # Create initial population
     organisms = create_initial_population()
+
+    # Prepare header for output data
     output = []
     headers = []
     for i in range(pd_org.MAX_BITS_OF_MEMORY + 1):
         headers.append("Organisms With " + str(i) + " Bits of Memory")
     output.append(headers)
 
+    # Adding each organism's strategy as keys
+    # Each key holds a list of occurrences for the same strategy
+    # IDs and parents are not considered due to PD org's __hash__ method;
+    # organisms appended to the same list will have same strategy, but not IDs or parents. 
     for org in organisms:
-    # Adding into the dictionary
+        # If the strategy is encountered multiple times, its occurrence is appended to a list
         if org in past_organisms:
             past_organisms[org].append(org)
+        # Otherwise, a new list containing the strategy is created
         else:
             past_organisms[org] = [org]
 
-    # Create detail file for generation 0  
+    # Create detail file for first generation
+    # There should be no parent data at this point
     pd_make_detail_file.make_file_detail(organisms, past_organisms, 0, OUTPUT_FOLDER)
     
     for i in range(NUMBER_OF_GENERATIONS):
@@ -153,14 +165,21 @@ def pd_evolve_population():
             organisms = pd_selection.get_next_generation_by_selection(organisms)
         # Mutate populataion
         organisms = get_mutated_population(organisms)
+
+        # Calculates, for each generation, the count of organisms with memory lengths 
+        # spanning from 0 to MAX_BITS_OF_MEMORY + 1. 
         output.append(pd_analysis.get_tally_of_number_of_bits_of_memory(organisms))
 
+        # Adding more into existing dictionary
+        # TODO: Why does this work? Why does the dictionary length remain unchanged?
+        # You would expect past_organisms to grow over time as newer strategies are discovered.
         for org in organisms:
-        #adding into the dictionary
             if org in past_organisms:
                 past_organisms[org].append(org)
             else:
                 past_organisms[org] = [org]
+
+        # Make detail file every OUTPUT_FREQUENCY generations
         if ( (i + 1) % OUTPUT_FREQUENCY == 0):
             pd_make_detail_file.make_file_detail(organisms, past_organisms, i + 1, OUTPUT_FOLDER)
 
@@ -213,14 +232,15 @@ def pd_evolve_population():
 #                reference_fitness_list, reference_fitness_best)
 #     return result
 
-def get_generation_stats(population, environment):
-    """Gets the stats for the given population"""
-    average_fitness = get_average_fitness(population, environment)
-    best_org = get_best_organism(population, environment)
-    best_fitness = best_org.fitness(environment)
-    stdev = stats.tstd([org.fitness(environment) 
-                        for org in population])
-    return average_fitness, stdev, best_org, best_fitness
+# OBSOLETE
+# def get_generation_stats(population, environment):
+#     """Gets the stats for the given population"""
+#     average_fitness = get_average_fitness(population, environment)
+#     best_org = get_best_organism(population, environment)
+#     best_fitness = best_org.fitness(environment)
+#     stdev = stats.tstd([org.fitness(environment) 
+#                         for org in population])
+#     return average_fitness, stdev, best_org, best_fitness
     
 
 def get_average_fitness(pop, environment):
