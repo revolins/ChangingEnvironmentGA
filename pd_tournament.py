@@ -68,7 +68,7 @@ def run_game(organism_a, organism_b):
         
         # Organisms retain memory of their own moves and those of their opponents.
         if TOGGLE_SELF_MEMORY_ON:
-            organism_a.store_bit_of_memory(a_cooperates)
+            organism_a.store_bit_of_memory(a_cooperates) # Memory is not in genotype
             organism_a.store_bit_of_memory(b_cooperates)
             organism_b.store_bit_of_memory(b_cooperates)
             organism_b.store_bit_of_memory(a_cooperates)
@@ -80,9 +80,10 @@ def run_game(organism_a, organism_b):
         total_payout_a += payout_a
         total_payout_b += payout_b
 
-    # TODO: why are we initializing again...
-    # organism_a.initialize_memory()
-    # organism_b.initialize_memory()
+    # Stored moves are changed back to initial memory (taken from genotype)
+    # Necessary to start new game, because organisms are shuffled
+    organism_a.initialize_memory()
+    organism_b.initialize_memory()
     
     return total_payout_a, total_payout_b
     

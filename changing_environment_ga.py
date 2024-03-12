@@ -4,6 +4,7 @@ from main import set_global_variables, generate_data
 import sys
 from string import ascii_uppercase
 import time 
+import random
 
 def parse_everything(command_line_args=None):
     """Parse command line arguments"""
@@ -37,4 +38,5 @@ def main(command_line_args=None):
     generate_data()
 
 if __name__ == "__main__":
+    random.seed(1)
     main()

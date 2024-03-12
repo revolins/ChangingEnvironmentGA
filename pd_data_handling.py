@@ -91,7 +91,7 @@ def plot_aggregate_over_time(data, pop_cost=None, mutation_bit=None, mutation_in
     plt.clf()
     colors = [color for color in COLORS]
     ax = plt.subplot(111)
-    for config in data: # are the subdirectories supposed to be named pop_cost =; mut_bit =...etc.?
+    for config in data: # Are the subdirectories supposed to be named pop_cost =; mut_bit =...etc.?
         if (pop_cost is not None and pop_cost != config[0]):
             continue
         if (mutation_bit is not None and mutation_bit != config[1]):
