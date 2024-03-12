@@ -1,3 +1,17 @@
+"""
+This module currently plots average bits of memory over generations 
+for a single evolutionary run.
+
+Required folder structure for this to work:
+    - Current directory (where this module will be run from)
+      |
+      └── pd_check/  (Main directory containing test data)
+          |
+          └── name_of_test/  (Directory specific to the test)
+
+changing_environment_ga.py must be run before producing plots.
+"""
+
 import csv
 import os
 import pandas as pd
@@ -9,37 +23,60 @@ from matplotlib.lines import Line2D
 #import scipy.stats as stats
 import operator
 
+# Colors to be used for plots
 COLORS = ["silver", "maroon", "red", "purple", "fuchsia", "green", "lime", "olive", "yellow",
               "navy", "blue", "teal", "aqua"]
 
 def main():
+    # Main directory holding test data
     test_dir = "pd_check"
+
+    # Retrieve test data
     data = get_data(test_dir)
-    #data = get_pickled_data(test_dir)
-    pop_costs = None
-    mutation_bits = None
+
+    # data = get_pickled_data(test_dir)
+
+    # I don't know what this is
+    pop_costs = None # Population cost??
+    mutation_bits = None # What
     mutation_initials = None
+
+    # Plot aggregate data over time
     plot_aggregate_over_time(data, pop_costs, mutation_bits, mutation_initials, test_dir)
 
 
-
+# TODO: naming conventions for subdirectories
 def get_data(common_dir):
-    """Version of get_data that doesn't use cPickle"""
-    #Make a new dictionary
+    """
+    Organizes test data in a given directory into a dictionary for further processing
+    Version of get_data that doesn't use cPickle
+    """
+    # Make a new dictionary
     data = {}
-    #For each sub directory...
+
+    # Iterate over each entry in the specified directory
     for sub_dir in os.listdir(common_dir):
-        #If it's not actually a directory, skip it
+        # If it's not actually a subdirectory, skip it
         if not os.path.isdir(common_dir + "/" + sub_dir):
             continue
-        #Grab the meaningful config name
+
+        # Split subdirectory name to get rid of leading paths and then by "."
         sub_dir_name_list = sub_dir.split("/")[-1].split(".")
+        # This gives ['pd_static_test1_0', '01_cost']
         print(sub_dir_name_list)
+
+        # Join all elements except the last one with "." as separator
         config = ".".join(sub_dir_name_list[:-1])
-        #removes gen quick fix
+        # This gives "pd_static_test1_0" ???
+        print(config)
+
+
+        # removes gen quick fix
         config = config[:-3]
         config = config.split("_")
         config = tuple(config)
+        # This gives ('pd', 'static', 'test')
+        print(config)
 
         #Make sure the config name is in the dictionary
         if config not in data:
@@ -54,7 +91,7 @@ def plot_aggregate_over_time(data, pop_cost=None, mutation_bit=None, mutation_in
     plt.clf()
     colors = [color for color in COLORS]
     ax = plt.subplot(111)
-    for config in data:
+    for config in data: # are the subdirectories supposed to be named pop_cost =; mut_bit =...etc.?
         if (pop_cost is not None and pop_cost != config[0]):
             continue
         if (mutation_bit is not None and mutation_bit != config[1]):
@@ -92,7 +129,6 @@ def plot_aggregate_over_time(data, pop_cost=None, mutation_bit=None, mutation_in
     hl = sorted(zip(handles, labels), key = operator.itemgetter(1))
     handles2, labels2 = zip(*hl)
     
-
     box = ax.get_position()
     ax.set_position([box.x0, box.y0, box.width * 0.7, box.height])
     ax.legend(handles2, labels2, bbox_to_anchor=(1, 1), loc=2, mode="expand", borderaxespad=0.)
