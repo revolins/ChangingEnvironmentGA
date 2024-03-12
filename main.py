@@ -111,7 +111,9 @@ def pd_evolve_population():
         output.append(pd_analysis.get_tally_of_number_of_bits_of_memory(organisms))
 
         # Adding more into existing dictionary
-        # TODO: Why does this work? Why does the dictionary length remain unchanged?
+        # TODO: Why does this work? Why does the dictionary length remain unchanged? 
+            # We're testing with 0.0 mutation rate
+            # Will probably change with higher mutation rate
         # You would expect past_organisms to grow over time as newer strategies are discovered.
         for org in organisms:
             if org in past_organisms:
