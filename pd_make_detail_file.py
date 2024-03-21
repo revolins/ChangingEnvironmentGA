@@ -38,6 +38,7 @@ def make_file_detail(organisms, past_organisms, current_generation, filepath):
     for key in past_organisms:
         row = []
         row.append(key.genotype.number_of_bits_of_memory)
+        #row.append(key.genotype.number_of_bits_of_summary)
         row.append(key.genotype.decision_list)
         row.append(key.genotype.initial_memory)
 
