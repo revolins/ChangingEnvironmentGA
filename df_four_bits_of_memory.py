@@ -27,22 +27,24 @@ summary_df = bits_of_memory_df.groupby(['Condition', 'Generation'], observed=Tru
     group_sd=('Mean', 'std')
 ).reset_index()
 
+conditions = summary_df['Condition'].unique()
+
+palette = sns.color_palette("husl", len(conditions))
 plt.figure(figsize=(10, 6))
-sns.lineplot(data=summary_df, x='Generation', y='group_mean', hue='Condition', style='Condition', markers=True, dashes=False, err_style="band", ci='sd')
-plt.fill_between(data=summary_df, x='Generation', y1=summary_df['group_mean'] - summary_df['group_sd'], y2=summary_df['group_mean'] + summary_df['group_sd'], alpha=0.3)
+sns.lineplot(data=summary_df, x='Generation', y='group_mean', hue='Condition', style='Condition', markers=False, dashes=False, err_style="band", errorbar='ci', palette=palette)
+ax = plt.gca()
+for i, condition in enumerate(conditions):
+    df_condition = summary_df[summary_df['Condition'] == condition]
+    color = palette[i]
+    
+    ax.fill_between(x=df_condition['Generation'],
+                    y1=df_condition['group_mean'] - df_condition['group_sd'],
+                    y2=df_condition['group_mean'] + df_condition['group_sd'],
+                    color=color, alpha=0.3)
 plt.title('Average Bits of Memory Over Time')
 plt.ylabel('Average Bits of Memory')
 plt.grid(False)
 plt.savefig('Average_Bits_Memory_Overtime_Static_Comp.pdf')
-
-filtered_df = summary_df[summary_df['Condition'].isin([0, 0.01, 0.03, 0.05, 0.075])]
-plt.figure(figsize=(10, 6))
-sns.lineplot(data=filtered_df, x='Generation', y='group_mean', hue='Condition', style='Condition', markers=True, dashes=False, err_style="band", ci='sd') #, palette=['#F5828C', '#8CF582', '#82F5EB', '#828BF5'] # Palette for when we have 4 samples
-plt.fill_between(data=filtered_df, x='Generation', y1=filtered_df['group_mean'] - filtered_df['group_sd'], y2=filtered_df['group_mean'] + filtered_df['group_sd'], alpha=0.3)
-plt.title('Average Bits of Memory Over Time (Restricted Conditions)')
-plt.ylabel('Average Bits of Memory')
-plt.grid(False)
-plt.savefig('Average_Bits_Memory_Overtime_Restricted_Static_Comp.pdf')
 
 plt.figure(figsize=(10, 6))
 plt.hist(bits_of_memory_df['Mean'], bins=30)
