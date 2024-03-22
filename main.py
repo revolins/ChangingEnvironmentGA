@@ -144,6 +144,9 @@ def set_global_variables(config):
     CONFIG_FILE = config.get("DEFAULT", "config_file")
     global START_TIME
     START_TIME = config.getfloat("DEFAULT", "start_time")
+    global SEED
+    SEED = config.getint("DEFAULT", "seed")
+    random.seed(SEED)
 
     # Pre-specified in config file
     global VERBOSE

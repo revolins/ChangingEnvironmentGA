@@ -1,10 +1,8 @@
 import configparser
 import argparse
 from main import set_global_variables, generate_data
-import sys
 from string import ascii_uppercase
 import time 
-import random
 
 def parse_everything(command_line_args=None):
     """Parse command line arguments"""
@@ -12,8 +10,10 @@ def parse_everything(command_line_args=None):
         description='The changing environments program.')
     
     # Expects 2 arguments: config file & output folder
+    # s or 'seed' (int, OPTIONAL)
     conf_parser.add_argument("-c", "--config_file", nargs=1)
     conf_parser.add_argument("-o", "--output_folder", nargs=1)
+    conf_parser.add_argument("--seed", type=str, default=str(time.time()))
     
     args = conf_parser.parse_args(args=command_line_args)    
 
@@ -26,6 +26,7 @@ def parse_everything(command_line_args=None):
     # Set paths to config file and output folder as additional settings
     config.set("DEFAULT", "config_file", config_file) 
     config.set("DEFAULT", "output_folder", output_folder)
+    config.set("DEFAULT", "seed", args.seed)
     
     config.set("DEFAULT", "start_time", str(time.time()))
     return config
@@ -38,5 +39,4 @@ def main(command_line_args=None):
     generate_data()
 
 if __name__ == "__main__":
-    random.seed(1)
     main()

@@ -5,3 +5,5 @@ OLD/
 *.pdf
 *.csv
 pd_check/
+*_pd_check/
+*_Plots/
