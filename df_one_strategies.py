@@ -5,7 +5,7 @@ import pandas
 import os
 import sys
 
-csv.field_size_limit(sys.maxsize)
+#csv.field_size_limit(sys.maxsize)
 frames = []
 
 def make_strategy_dictionary(fileregx):
@@ -30,19 +30,18 @@ def make_strategy_dictionary(fileregx):
   #puts all the strategies ever into dictionary
   last_file = filelist[-1]
 
-  with open(last_file, 'rb') as csvfile:
+  with open(last_file, 'r') as csvfile:
     reader = csv.reader(csvfile)
-    reader.next()
     for row in reader:
+      print(row)
       key = row[1] + "~" + row[2]
       number_of_strategies[key] = []
 
   #makes keys of decisionlist+memory
   #adds number of alive to the keys location in dictionary
   for individual_file in filelist:
-    with open(individual_file, 'rb') as csvfile:
+    with open(individual_file, 'r') as csvfile:
       reader = csv.reader(csvfile)
-      reader.next()
       for row in reader:
         key = row[1] + "~" + row[2]
         number_of_strategies[key].append(int(row[3]))
@@ -79,7 +78,8 @@ def make_strategy_dictionary(fileregx):
 list_most_common = "Common_Strategy, Condition\n"
 
 values_do_not_want = ['pd--1.0_', 'pd-0.3_', 'pd-0.2_', 'pd-0.1_', 'pd-0.0_', 'pd--0.5_', 'pd-0.4_', 'pd-0.5_', 'pd-1.0_', 'pd-7.0_']
-for paths in glob.glob("pdoutput2015_July_02selection_by_static_competitor/*"):
+for paths in glob.glob("pd_check/*"):
+  print(paths)
   if any(filter(lambda x: x in paths, values_do_not_want)):
     continue
   if (os.path.isdir(paths)):
@@ -99,17 +99,12 @@ for paths in glob.glob("pdoutput2015_July_02selection_by_static_competitor/*"):
     print("Finished" + str(paths))
     list_most_common += ",".join(most_common) + "\n"
 
-strategies_df = pandas.concat(frames)
-
 with open("most_common.csv", "wb") as most_common_file:
     for item in list_most_common:
         most_common_file.write(item.encode('utf-8') + b'\n')
 
-
-# most_common_file = file("most_common.csv", "wb") # Old File Writing
-# most_common_file.write(list_most_common)
-
-#strategies_df = make_strategy_dictionary("/mnt/home/leasmika/ChangingEnvironmentGA/pdoutput2015_June_23/pd-0.1_gen.ini_arr1_run0")
-#beaker.set('strategies_df', strategies_df) 
-
 strategies_df.to_csv("strategies_df.csv", header=False)
+#strategies_df = pandas.concat(frames)
+strategies_df = make_strategy_dictionary("pd_check/pd_static_test1_0.0_cost")
+strategies_df.to_csv("single_run_test_strategies_df.csv", header=False)
+
