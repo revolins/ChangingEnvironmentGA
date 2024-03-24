@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -16,6 +15,6 @@ plt.figure(figsize=(10, 6))
 sns.lineplot(data=strategies_df, x='Generation', y='Frequency', hue='Strategy', palette='tab10')
 plt.grid(False) 
 plt.gca().set_facecolor('white') 
-plt.legend().set_visible(False)  
+plt.legend().set_visible(True)  
 plt.tight_layout()  
 plt.savefig("Strategy_Frequency_Plot.pdf")  

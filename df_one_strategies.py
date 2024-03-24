@@ -32,8 +32,10 @@ def make_strategy_dictionary(fileregx):
 
   with open(last_file, 'r') as csvfile:
     reader = csv.reader(csvfile)
+    next(reader)
     for row in reader:
-      print(row)
+      if row == []:
+        continue
       key = row[1] + "~" + row[2]
       number_of_strategies[key] = []
 
@@ -42,7 +44,10 @@ def make_strategy_dictionary(fileregx):
   for individual_file in filelist:
     with open(individual_file, 'r') as csvfile:
       reader = csv.reader(csvfile)
+      next(reader)
       for row in reader:
+        if row == []:
+          continue
         key = row[1] + "~" + row[2]
         number_of_strategies[key].append(int(row[3]))
     max_list_length = max([ len(number_of_strategies[l]) for l in number_of_strategies])
@@ -73,13 +78,13 @@ def make_strategy_dictionary(fileregx):
   strategies_df['Strategy'] = number_of_strategies.keys()
   
   return strategies_df, [common_one_strategy, Condition]
- 
 
 list_most_common = "Common_Strategy, Condition\n"
 
+#TODO: install tqdm for tracking progress on glob
 values_do_not_want = ['pd--1.0_', 'pd-0.3_', 'pd-0.2_', 'pd-0.1_', 'pd-0.0_', 'pd--0.5_', 'pd-0.4_', 'pd-0.5_', 'pd-1.0_', 'pd-7.0_']
 for paths in glob.glob("pd_check/*"):
-  print(paths)
+  #print("Start: ", paths)
   if any(filter(lambda x: x in paths, values_do_not_want)):
     continue
   if (os.path.isdir(paths)):
@@ -96,15 +101,17 @@ for paths in glob.glob("pd_check/*"):
           binary_most_common += str(0)
       binary_most_common += "~"
     most_common[0] = binary_most_common
-    print("Finished" + str(paths))
+    #print("Finished: " + str(paths))
     list_most_common += ",".join(most_common) + "\n"
 
-with open("most_common.csv", "wb") as most_common_file:
+with open("most_common.csv", "w") as most_common_file:
     for item in list_most_common:
-        most_common_file.write(item.encode('utf-8') + b'\n')
+        most_common_file.write(item)
 
-strategies_df.to_csv("strategies_df.csv", header=False)
 #strategies_df = pandas.concat(frames)
-strategies_df = make_strategy_dictionary("pd_check/pd_static_test1_0.0_cost")
-strategies_df.to_csv("single_run_test_strategies_df.csv", header=False)
+#print("Strategies DF: ", strategies_df)
+strategies_df.to_csv("strategies_df.csv", header=False)
+
+# strategies_df = make_strategy_dictionary("pd_check/pd_static_test1_0.0_cost")
+# strategies_df.to_csv("most_common.csv", header=False)
 
