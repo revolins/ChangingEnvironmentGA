@@ -13,7 +13,7 @@ MUTATION_LIKELIHOOD_OF_BITS_OF_MEMORY = None
 MUTATION_LIKELIHOOD_OF_INITIAL_MEMORY_STATE = None
 
 class StochasticPDGenotype(object):
-    """Genotype for COIN FLIP/random type opponents in static environment"""
+    """Genotype for static COIN FLIP/random type opponents in static environment"""
     def __init__(self, probability=.5, number_of_bits_of_memory=0):
         self.probability = probability
         self.number_of_bits_of_memory = number_of_bits_of_memory
@@ -128,14 +128,10 @@ class HybridPDGenotype(object):
     """
 
     def __init__(self, number_of_bits_of_memory, number_of_bits_of_summary, decision_list, initial_memory, initial_summary):
-        # print("CURRENT NUMBER OF BITS OF MEMORY")
-        # print(number_of_bits_of_memory)
         assert 0 <= number_of_bits_of_memory <= MAX_BITS_OF_MEMORY
-        # print("Decision List Sanity Check")
-        # print(len(decision_list))
-        # print(2 ** number_of_bits_of_memory * (number_of_bits_of_summary + 1))
         assert len(decision_list) == 2 ** number_of_bits_of_memory * (number_of_bits_of_summary + 1)
         assert len(initial_memory) == number_of_bits_of_memory
+        assert len(initial_summary) == number_of_bits_of_summary
         self.number_of_bits_of_memory = number_of_bits_of_memory
         self.number_of_bits_of_summary = number_of_bits_of_summary
         self.decision_list = decision_list
@@ -193,38 +189,62 @@ class HybridPDGenotype(object):
         # Decision mutation
         return self._decision_list_mutant()
 
-
     def _get_bits_of_memory_mutant(self):
         """
-        Increase or decrease length of initial (specific) and summary memory by 1 bit.
+        Increase or decrease length of initial (specific) and summary memory by 1 bit each.
         Affects length of decision list as well. 
         """
         should_increase_memory = random.choice([True, False])
+
+        # If organism has no memory, don't decrease memory
         if self.number_of_bits_of_memory == 0 and self.number_of_bits_of_summary == 0 and not should_increase_memory:
             return self
+        
+        # If organism has maximum memory length, don't increase memory
         if self.number_of_bits_of_memory == MAX_BITS_OF_MEMORY and self.number_of_bits_of_summary == MAX_BITS_OF_SUMMARY and should_increase_memory:
             #Return full normal memory but hybrid relies on 2*k * (j+1)
             return self
+        
+        # If we increase memory length
         if should_increase_memory:
-            new_number_of_bits_of_memory = self.number_of_bits_of_memory + 1
-            new_number_of_bits_of_summary = self.number_of_bits_of_summary + 1
-            new_decision_list = 2 ** self.decision_list * (len(self.decision_list) + 1)
+            new_number_of_bits_of_memory = self.number_of_bits_of_memory + 1 # (k) 
+            new_number_of_bits_of_summary = self.number_of_bits_of_summary + 1 # (j)
+            # Length of new decision list 2^k(j+1)
+            length_of_new_decision_list = 2 ** new_number_of_bits_of_memory * (new_number_of_bits_of_summary + 1)
+            
+            # Double list, duplicate decisions
+            # Retain as much of the original pattern as possible, not sure if matters
+            # Also try to mimic original mutation method as closely as possible
+            new_decision_list = 2 * self.decision_list
+            
+            # Fill the rest of the new list with random decisions
+            for i in range(length_of_new_decision_list - len(new_decision_list)):
+                new_decision_list.append(random.choice[True, False])
+
+            # Add 1 extra bit to initial memory
             new_initial_memory = self.initial_memory[:]
             new_initial_memory.append(random.choice([True,False]))
+
+            # Add 1 extra bit to summary memory
             new_initial_summary = self.initial_summary[:]
             new_initial_summary.append(random.choice([True, False]))
+
             return HybridPDGenotype(new_number_of_bits_of_memory, new_number_of_bits_of_summary, new_decision_list, new_initial_memory, new_initial_summary)
-        # should decrease memory
+        
         # TODO: Current bug, decreasing memory out of order? Unlikely
         # length of decision list causes cascading issues after generations? More likely
         # Slicing necessary for summary and memory? Unlikely
-        # TODO: should there be an else statement here?
-        new_number_of_bits_of_memory = self.number_of_bits_of_memory - 1
-        new_number_of_bits_of_summary = self.number_of_bits_of_summary - 1
-        length_of_new_decision_list = (2 // len(self.decision_list)) // (len(self.decision_list) + 1)
+
+        # If we decrease memory length
+        new_number_of_bits_of_memory = self.number_of_bits_of_memory - 1 # (k)
+        new_number_of_bits_of_summary = self.number_of_bits_of_summary - 1 # (j)
+        length_of_new_decision_list = 2 ** new_number_of_bits_of_memory * (new_number_of_bits_of_summary + 1) # (2^k(j+1))
+        
+        # Update size of memory and decision lists, most distant past memory bits removed
         new_decision_list = self.decision_list[:length_of_new_decision_list]
         new_initial_memory = self.initial_memory[:-1]
         new_initial_summary = self.initial_summary[:-1]
+
         return HybridPDGenotype(new_number_of_bits_of_memory, new_number_of_bits_of_summary, new_decision_list, new_initial_memory, new_initial_summary) 
         
     def _decision_list_mutant(self):
@@ -236,13 +256,14 @@ class HybridPDGenotype(object):
         
     def _initial_memory_mutant(self):
         """
-        Randomly flip a single bit in both initial (specified) and summary memory.
-        If there is no memory, no change is made.
+        Randomly flip a single bit in both initial specified and summary memory.
+        This affects the state of memory the organism starts with.  
         """
+        # If there is no memory, no change is made.
         if self.number_of_bits_of_memory == 0:
             return self
         
-        # Mutate in initial (specified) memory
+        # Mutate in specified memory
         mutation_location = random.randrange(len(self.initial_memory))
         new_initial_memory = self.initial_memory[:]
         new_initial_memory[mutation_location] = not new_initial_memory[mutation_location]
@@ -251,6 +272,7 @@ class HybridPDGenotype(object):
         mutation_location = random.randrange(len(self.initial_summary))
         new_initial_summary = self.initial_summary[:]
         new_initial_summary[mutation_location] = not new_initial_summary[mutation_location]
+
         return HybridPDGenotype(self.number_of_bits_of_memory, self.number_of_bits_of_summary, self.decision_list, new_initial_memory, new_initial_summary)
 
 class PDOrg(object):
