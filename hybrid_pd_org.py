@@ -197,11 +197,11 @@ class HybridPDGenotype(object):
         should_increase_memory = random.choice([True, False])
 
         # If organism has no memory, don't decrease memory
-        if self.number_of_bits_of_memory == 0 and self.number_of_bits_of_summary == 0 and not should_increase_memory:
+        if (self.number_of_bits_of_memory == 0 or self.number_of_bits_of_summary == 0) and not should_increase_memory:
             return self
         
         # If organism has maximum memory length, don't increase memory
-        if self.number_of_bits_of_memory == MAX_BITS_OF_MEMORY and self.number_of_bits_of_summary == MAX_BITS_OF_SUMMARY and should_increase_memory:
+        if (self.number_of_bits_of_memory == MAX_BITS_OF_MEMORY or self.number_of_bits_of_summary == MAX_BITS_OF_SUMMARY) and should_increase_memory:
             #Return full normal memory but hybrid relies on 2*k * (j+1)
             return self
         
@@ -219,7 +219,7 @@ class HybridPDGenotype(object):
             
             # Fill the rest of the new list with random decisions
             for i in range(length_of_new_decision_list - len(new_decision_list)):
-                new_decision_list.append(random.choice[True, False])
+                new_decision_list.append(random.choice([True, False]))
 
             # Add 1 extra bit to initial memory
             new_initial_memory = self.initial_memory[:]
@@ -287,6 +287,7 @@ class PDOrg(object):
         if genotype is None:
             genotype = _create_random_genotype()
         self.genotype = genotype
+        self.memory = None
         self.initialize_memory()
         self.id = PDOrg.next_org_id
         PDOrg.next_org_id += 1
@@ -343,8 +344,10 @@ class PDOrg(object):
         
     def initialize_memory(self):
         """Get double-ended queue memory"""
-        # TODO: add summary memory
-        self.memory = deque(self.genotype.initial_memory + self.genotype.initial_summary) # makes a copy
+        if type(self.genotype) is HybridPDGenotype:
+            self.memory = deque(self.genotype.initial_memory + self.genotype.initial_summary) # makes a copy
+        else:
+            self.memory = deque(self.genotype.initial_memory)
         
     def fitness(self, environment):
         raise NotImplementedError()
