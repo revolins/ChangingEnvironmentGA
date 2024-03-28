@@ -140,8 +140,8 @@ def set_global_variables(config):
     # Added to config file from command line
     global OUTPUT_FOLDER
     OUTPUT_FOLDER = config.get("DEFAULT", "output_folder")
-    global CONFIG_FILE
-    CONFIG_FILE = config.get("DEFAULT", "config_file")
+    # global CONFIG_FILE
+    # CONFIG_FILE = config.get("DEFAULT", "config_file")
     global START_TIME
     START_TIME = config.getfloat("DEFAULT", "start_time")
     global SEED
@@ -190,17 +190,14 @@ def save_string_to_file(string, filename):
 
 def generate_data():
     """The main function; generates all the data"""
-    # Create output folder, place copy of config file inside
+    # Create output folder for storing every component of the experiment
     if os.path.exists(OUTPUT_FOLDER):
         raise IOError("output_folder: {} already exists".format(OUTPUT_FOLDER))
     os.makedirs(OUTPUT_FOLDER)
-    config_filename = os.path.basename(CONFIG_FILE)
 
+    #TODO: merge join path with other functions
     def join_path(filename):
         return os.path.join(OUTPUT_FOLDER, filename)
-
-    config_dest = os.path.join(OUTPUT_FOLDER, config_filename)
-    shutil.copyfile(CONFIG_FILE, config_dest)
 
     if ORG_TYPE == "pd":
         output = pd_evolve_population()

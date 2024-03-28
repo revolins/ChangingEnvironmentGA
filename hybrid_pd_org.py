@@ -9,6 +9,7 @@ from collections import deque
 
 # Parameters are set through set_global_variables() in main.py 
 MAX_BITS_OF_MEMORY = None
+MAX_BITS_OF_SUMMARY = None
 MUTATION_LIKELIHOOD_OF_BITS_OF_MEMORY = None
 MUTATION_LIKELIHOOD_OF_INITIAL_MEMORY_STATE = None
 
