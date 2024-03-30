@@ -32,6 +32,8 @@ def parse_everything(command_line_args=None):
     arg_parser.add_argument("--mutation_rate", "--mr",  type=str, default="0.00")
     arg_parser.add_argument("--output_frequency", type=str, default="10")
     arg_parser.add_argument("--selection_by_static_competitor", "--static", action="store_true", default=False)
+    arg_parser.add_argument("--randomized_rounds", action="store_true", default=False)
+    arg_parser.add_argument("--noise", type=str, default="0.0")
     
     args = arg_parser.parse_args(args=command_line_args)    
 
@@ -39,6 +41,7 @@ def parse_everything(command_line_args=None):
     verbose = str(args.verbose)
     toggle_self_memory_on = str(args.toggle_self_memory_on)
     selection_by_static_competitor = str(args.selection_by_static_competitor)
+    randomized_rounds = str(args.randomized_rounds)
 
     # Set configuration based on argument setting
     config = configparser.ConfigParser() 
@@ -64,6 +67,8 @@ def parse_everything(command_line_args=None):
     config.set("DEFAULT", "mutation_rate", args.mutation_rate)
     config.set("DEFAULT", "output_frequency", args.output_frequency)
     config.set("DEFAULT", "selection_by_static_competitor", selection_by_static_competitor)
+    config.set("DEFAULT", "randomized_rounds", randomized_rounds)
+    config.set("DEFAULT", "noise", args.noise)
     
     config.set("DEFAULT", "start_time", str(time.time()))
     return config

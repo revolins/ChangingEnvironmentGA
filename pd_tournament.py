@@ -5,8 +5,13 @@ their score in an iterated Prisoner's Dilemma
 
 import pd_org
 import itertools
+import numpy as np
+import random
 
 NUMBER_OF_ROUNDS = 64
+RANDOMIZED_ROUNDS = False
+SEED = 500
+NOISE = 0.0
 
 TEMPTATION = 5
 REWARD = 3
@@ -39,7 +44,7 @@ def pd_payout(a_cooperates, b_cooperates):
         return TEMPTATION, SUCKER
     elif not a_cooperates and not b_cooperates:
         return PUNISHMENT, PUNISHMENT
-    raise AssertionError("Impossible To Get Here")
+    raise AssertionError("Impossible To Reach End of PD Payout")
 
 
 def run_game(organism_a, organism_b):
@@ -52,10 +57,23 @@ def run_game(organism_a, organism_b):
     
     total_payout_a = 0
     total_payout_b = 0
+    if RANDOMIZED_ROUNDS:
+        # Size 500 to match NUMBER_OF_GENERATIONS, scale=3 for full scope of std. dev., mean set to NUMBER_OF_ROUNDS
+        curr_num_rounds = np.random.choice(list(np.random.default_rng(seed=SEED).normal(loc=NUMBER_OF_ROUNDS, scale=3, size=500).astype(int)))
+        if curr_num_rounds <= 0:
+            raise AssertionError(f"Number of Randomized Rounds - {curr_num_rounds} is too low, scale or loc requires adjustment")
+    else:
+        curr_num_rounds = NUMBER_OF_ROUNDS
     
-    for _ in range(NUMBER_OF_ROUNDS):
+    for _ in range(curr_num_rounds):
         a_cooperates = organism_a.will_cooperate()
         b_cooperates = organism_b.will_cooperate()
+
+        if random.random() < NOISE:
+            noisy_decision = np.random.choice([0, 1])
+
+            if noisy_decision == 0: a_cooperates = not a_cooperates
+            else: b_cooperates = not b_cooperates
 
         payout_a, payout_b = pd_payout(a_cooperates, b_cooperates)
         

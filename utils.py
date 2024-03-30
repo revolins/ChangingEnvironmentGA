@@ -15,6 +15,7 @@ import OLD.old_fitness_function as ff
 from math import floor
 import os
 import shutil
+import numpy as np
 import datetime
 import pd_selection
 import pd_analysis
@@ -35,12 +36,13 @@ CROWDING = False # True to activate Crowding Selection
 OUTPUT_FOLDER = None
 OUTPUT_FREQUENCY = None
 SELECTION_BY_STATIC_COMPETITOR = False # True to activate static environment
+RANDOMIZED_ROUNDS = False
 
 def create_initial_population():
     """
     Create a starting population by forming a list of randomly generated organisms.
     """
-    org_type_map = {"string": string_org.StringOrg, "vector": real_value_vector_org.RealValueVectorOrg, "pd": pd_org.PDOrg}
+    org_type_map = {"string": string_org.StringOrg, "vector": real_value_vector_org.RealValueVectorOrg, "pd": pd_org.PDOrg} # , "hybrid_pd": pd_org.HybridPDOrg
     if ORG_TYPE in org_type_map:
         return [org_type_map[ORG_TYPE]() for _ in range(NUMBER_OF_ORGANISMS)]
     
@@ -147,6 +149,7 @@ def set_global_variables(config):
     global SEED
     SEED = config.getint("DEFAULT", "seed")
     random.seed(SEED)
+    np.random.seed(SEED)
     global VERBOSE
     VERBOSE = config.getboolean("DEFAULT", "verbose")
     global NUMBER_OF_ORGANISMS
@@ -164,6 +167,9 @@ def set_global_variables(config):
         global SELECTION_BY_STATIC_COMPETITOR
         SELECTION_BY_STATIC_COMPETITOR = config.getboolean("DEFAULT", "selection_by_static_competitor")
         pd_tournament.NUMBER_OF_ROUNDS = config.getint("DEFAULT", "number_of_rounds")
+        pd_tournament.RANDOMIZED_ROUNDS = config.getboolean("DEFAULT", "randomized_rounds")
+        pd_tournament.SEED = config.getint("DEFAULT", "seed")
+        pd_tournament.NOISE = config.getfloat("DEFAULT", "noise")
         pd_tournament.TEMPTATION = config.getint("DEFAULT", "temptation")
         pd_tournament.REWARD = config.getint("DEFAULT", "reward")
         pd_tournament.PUNISHMENT = config.getint("DEFAULT", "punishment")
