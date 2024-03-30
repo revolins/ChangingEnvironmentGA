@@ -2,15 +2,21 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+import os 
+import argparse
+
 from scipy import stats
 from statsmodels.stats.multicomp import pairwise_tukeyhsd, MultiComparison
 
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning) #For those pesky deprecation warnings
 
-def average_mem():
+def join_path(output_folder, filename):
+        return os.path.join(output_folder, filename)
+
+def average_mem(output_folder):
     print("Constructing Memory Plots and Running Statistical Tests")
-    bits_of_memory_df = pd.read_csv("pd_check/all_bits_df_static_comp_more_values.csv")
+    bits_of_memory_df = pd.read_csv(join_path(output_folder, "all_bits_df_static_comp_more_values.csv"))
     bits_of_memory_df.replace([np.inf, -np.inf], np.nan, inplace=True)
     print(bits_of_memory_df.columns.tolist())
     bits_of_memory_df.columns = ['Row_Label', 'B0', 'B1', 'B2', 'B3', 'B4', 'Condition', 'Generation']
@@ -46,7 +52,7 @@ def average_mem():
     plt.title('Average Bits of Memory Over Time')
     plt.ylabel('Average Bits of Memory')
     plt.grid(False)
-    plt.savefig('pd_check/Average_Memory.png')
+    plt.savefig(join_path(output_folder, 'Average_Memory.png'))
 
     palette = sns.color_palette("husl", len(conditions))
     plt.figure(figsize=(10, 6))
@@ -54,44 +60,54 @@ def average_mem():
     plt.title('Average Bits of Memory Over Time')
     plt.ylabel('Average Bits of Memory')
     plt.grid(False)
-    plt.savefig('pd_check/Average_Memory_NoDashes.png')
+    plt.savefig(join_path(output_folder, 'Average_Memory_NoDashes.png'))
 
     plt.figure(figsize=(10, 6))
     plt.hist(bits_of_memory_df['Mean'], bins=30)
     plt.title('Distribution of Mean Bits of Memory')
     plt.xlabel('Mean Bits of Memory')
     plt.ylabel('Frequency')
-    plt.savefig('pd_check/Mean_Memory.png')
+    plt.savefig(join_path(output_folder, 'Mean_Memory.png'))
 
-    try:
-        anova_results = stats.f_oneway(*[group['Mean'].values for name, group in bits_of_memory_df.groupby('Condition', observed=True)])
-        print(f'ANOVA test results: {anova_results}')
-    except:
-        print("ANOVA test failed, likely needs more tests")
+    with open(join_path(output_folder, "stat_output.txt"), "w") as f:
+        try:
+            anova_results = stats.f_oneway(*[group['Mean'].values for name, group in bits_of_memory_df.groupby('Condition', observed=True)])
+            f.writelines(f'ANOVA test results: {anova_results}')
+            f.write('\n')
+            print(f'ANOVA test results: {anova_results}')
+        except:
+            print("ANOVA test failed, likely needs more tests")
 
-    try:
-        tukey_results = pairwise_tukeyhsd(bits_of_memory_df['Mean'], bits_of_memory_df['Condition'])
-        print(tukey_results)
-    except:
-        print("Tukey test failed, likely needs more tests")
+        try:
+            tukey_results = pairwise_tukeyhsd(bits_of_memory_df['Mean'], bits_of_memory_df['Condition'])
+            f.writelines(f'Tukey test results: {tukey_results}')
+            f.write('\n')
+            print(f'Tukey test results: {tukey_results}')
+        except:
+            print("Tukey test failed, likely needs more tests")
 
-    try:
-        kruskal_data = bits_of_memory_df[bits_of_memory_df['Generation'] == 499]
-        kruskal_results = stats.kruskal(*[group['Mean'].values for name, group in kruskal_data.groupby('Condition', observed=True)])
-        print(f'Kruskal-Wallis test results: {kruskal_results}')
-    except:
-        print("Kruskal-Wallis Test Failed, results likely identical - can be fixed with more tests")
+        try:
+            kruskal_data = bits_of_memory_df[bits_of_memory_df['Generation'] == 499]
+            kruskal_results = stats.kruskal(*[group['Mean'].values for name, group in kruskal_data.groupby('Condition', observed=True)])
+            f.writelines(f'Kruskal-Wallis test results: {kruskal_results}')
+            f.write('\n')
+            print(f'Kruskal-Wallis test results: {kruskal_results}')
+        except:
+            print("Kruskal-Wallis Test Failed, results likely identical - can be fixed with more tests")
 
-    try:
-        comparison = MultiComparison(kruskal_data['Mean'], kruskal_data['Condition'])
-        wilcox_results = comparison.allpairtest(stats.mannwhitneyu, method='bonferroni')
-        print(wilcox_results[0])
-    except:
-        print("Wilcox Test Failed, results likely identical - can be fixed with more tests")
+        try:
+            comparison = MultiComparison(kruskal_data['Mean'], kruskal_data['Condition'])
+            wilcox_results = comparison.allpairtest(stats.mannwhitneyu, method='bonferroni')
+            f.writelines(f'Bonferroni-Corrected Kruskal/Wilcox Test Results: {wilcox_results[0]}')
+            f.write('\n')
+            print(f'Bonferroni-Corrected Kruskal/Wilcox Test Results: {wilcox_results[0]}')
+        except:
+            print("Wilcox Test Failed, results likely identical - can be fixed with more tests")
+    f.close()
 
-def strat_freq():
+def strat_freq(output_folder):
     print("Constructing Strategy Frequency Plot")
-    strategies_df = pd.read_csv("pd_check/strategies_df.csv", header=None)
+    strategies_df = pd.read_csv(join_path(output_folder, "strategies_df.csv"), header=None)
     column_names = ['Row_Label'] + list(range(0, 501, 10)) + ['Condition', 'Strategy']
     strategies_df.columns = column_names
 
@@ -107,11 +123,11 @@ def strat_freq():
     plt.gca().set_facecolor('white') 
     plt.legend().set_visible(True)  
     plt.tight_layout()  
-    plt.savefig("pd_check/Strategy_Frequency_Plot.png")  
+    plt.savefig(join_path(output_folder, "Strategy_Frequency_Plot.png"))  
 
-def common_strats():
+def common_strats(output_folder):
     print("Constructing Common Strategy Plot")
-    most_common_strategy = pd.read_csv("pd_check/most_common.csv")
+    most_common_strategy = pd.read_csv(join_path(output_folder, "most_common.csv"))
     print(most_common_strategy)
     #File currently saves Condition with a space in front
     most_common_strategy[' Condition'] = pd.to_numeric(most_common_strategy[' Condition'], errors='coerce') 
@@ -135,8 +151,21 @@ def common_strats():
 
     for container in plt.gca().containers:
         plt.bar_label(container, label_type='edge')
-    plt.savefig("pd_check/Most_Common_Strategies.png")
+    plt.savefig(join_path(output_folder, "Most_Common_Strategies.png"))
 
-average_mem()
-strat_freq()
-common_strats()
+def main():
+    arg_parser = argparse.ArgumentParser(
+        description='Plotting function for compiled csvs.')
+    
+    # Expects 1 argument: output folder
+    arg_parser.add_argument("-o", "--output_folder", type=str, default="tests/pd_temp")
+    args = arg_parser.parse_args()
+
+    average_mem(args.output_folder)
+    strat_freq(args.output_folder)
+    common_strats(args.output_folder)
+    
+
+if __name__ == "__main__":
+    main()
+

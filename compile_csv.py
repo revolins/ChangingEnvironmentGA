@@ -3,9 +3,13 @@ import glob
 import re
 import pandas
 import os
+import argparse
 
-def build_experiment_csv():
-    list_of_bits = glob.glob("pd_check/*/bits_of_memory_overtime.csv")
+def join_path(output_folder, filename):
+        return os.path.join(output_folder, filename)
+
+def build_experiment_csv(output_folder):
+    list_of_bits = glob.glob(join_path(output_folder, '*/bits_of_memory_overtime.csv'))
     all_bits_df = pandas.DataFrame()
 
     print("Compiling Experimental Memory Results")
@@ -23,7 +27,7 @@ def build_experiment_csv():
         all_bits_df = all_bits_df._append(individual_file_df)
     
     #print individual_file.split("/")[-2], len(individual_file_df), all_bits_df.shape[0]
-    all_bits_df.to_csv("pd_check/all_bits_df_static_comp_more_values.csv", header=True)
+    all_bits_df.to_csv(join_path(output_folder, 'all_bits_df_static_comp_more_values.csv'), header=True)
 
 def make_strategy_dictionary(fileregx):
   def atoi(text):
@@ -112,7 +116,7 @@ def format_common_strat(most_common):
 
     return most_common
 
-def build_strat_csv():
+def build_strat_csv(output_folder):
     frames = []
     list_most_common = "Common_Strategy, Condition\n"
 
@@ -122,7 +126,7 @@ def build_strat_csv():
                                   'pd-7.0_']
     
     print("Compiling Strategy Results")
-    for paths in glob.glob("pd_check/*"):
+    for paths in glob.glob(join_path(output_folder, "*")):
         #print("Start: ", paths)
         if any(filter(lambda x: x in paths, values_do_not_want)):
             continue
@@ -133,13 +137,25 @@ def build_strat_csv():
             #print("Finished: " + str(paths))
             list_most_common += ",".join(most_common) + "\n"
 
-    with open("pd_check/most_common.csv", "w") as most_common_file:
+    with open(join_path(output_folder, "most_common.csv"), "w") as most_common_file:
         for item in list_most_common:
             most_common_file.write(item)
 
     #strategies_df = pandas.concat(frames)
     #print("Strategies DF: ", strategies_df)
-    strategies_df.to_csv("pd_check/strategies_df.csv", header=False)
+    strategies_df.to_csv(join_path(output_folder, "strategies_df.csv"), header=False)
 
-build_experiment_csv()
-build_strat_csv()
+def main():
+    arg_parser = argparse.ArgumentParser(
+        description='Plotting function for compiled csvs.')
+    
+    # Expects 1 argument: output folder
+    arg_parser.add_argument("-o", "--output_folder", type=str, default="tests/pd_temp")
+    args = arg_parser.parse_args()
+
+    build_experiment_csv(args.output_folder)
+    build_strat_csv(args.output_folder)
+    
+
+if __name__ == "__main__":
+    main()

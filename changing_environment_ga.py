@@ -1,6 +1,6 @@
 import configparser
 import argparse
-from main import set_global_variables, generate_data
+from utils import set_global_variables, generate_data
 from string import ascii_uppercase
 import time 
 import os

@@ -26,13 +26,13 @@ FITNESS_FUNCTION_TYPE = None
 NUMBER_OF_ORGANISMS = None
 MUTATION_RATE = None
 NUMBER_OF_GENERATIONS = None
-OUTPUT_FILE = None
 ORG_TYPE = None
 TOURNAMENT_SIZE = None
 VERBOSE = False
 ALTERNATE_ENVIRONMENT_CORR = None
 START_TIME = None
 CROWDING = False # True to activate Crowding Selection
+OUTPUT_FOLDER = None
 OUTPUT_FREQUENCY = None
 SELECTION_BY_STATIC_COMPETITOR = False # True to activate static environment
 
@@ -137,18 +137,16 @@ def get_average_fitness(pop, environment):
 
 def set_global_variables(config):
     """Sets all the global variables based on a config file"""
-    # Added to config file from command line
+    # Added to config from command line
     global OUTPUT_FOLDER
     OUTPUT_FOLDER = config.get("DEFAULT", "output_folder")
-    # global CONFIG_FILE
-    # CONFIG_FILE = config.get("DEFAULT", "config_file")
     global START_TIME
     START_TIME = config.getfloat("DEFAULT", "start_time")
+
+    # Default Values
     global SEED
     SEED = config.getint("DEFAULT", "seed")
     random.seed(SEED)
-
-    # Pre-specified in config file
     global VERBOSE
     VERBOSE = config.getboolean("DEFAULT", "verbose")
     global NUMBER_OF_ORGANISMS
@@ -188,17 +186,16 @@ def save_string_to_file(string, filename):
     with open(filename, "w") as f:
         f.write(string)
 
+def join_path(filename):
+        return os.path.join(OUTPUT_FOLDER, filename)
+
 def generate_data():
     """The main function; generates all the data"""
     # Create output folder for storing every component of the experiment
     if os.path.exists(OUTPUT_FOLDER):
         raise IOError("output_folder: {} already exists".format(OUTPUT_FOLDER))
     os.makedirs(OUTPUT_FOLDER)
-
-    #TODO: merge join path with other functions
-    def join_path(filename):
-        return os.path.join(OUTPUT_FOLDER, filename)
-
+    
     if ORG_TYPE == "pd":
         output = pd_evolve_population()
         output_filename = join_path("bits_of_memory_overtime.csv")
@@ -209,4 +206,3 @@ def generate_data():
     end_time = datetime.datetime.now()
     time_str = "Start_time {}\nEnd_time {}\nDuration {}\n".format(start_time, end_time, end_time - start_time)
     save_string_to_file(time_str, time_filename)
-    
