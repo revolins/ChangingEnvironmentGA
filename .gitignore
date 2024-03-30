@@ -8,3 +8,5 @@ pd_check/
 *_pd_check/
 *_Plots/
 *_results/
+coev*
+static*

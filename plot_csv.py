@@ -128,7 +128,6 @@ def strat_freq(output_folder):
 def common_strats(output_folder):
     print("Constructing Common Strategy Plot")
     most_common_strategy = pd.read_csv(join_path(output_folder, "most_common.csv"))
-    print(most_common_strategy)
     #File currently saves Condition with a space in front
     most_common_strategy[' Condition'] = pd.to_numeric(most_common_strategy[' Condition'], errors='coerce') 
     most_common_strategy['Common_Strategy'] = most_common_strategy['Common_Strategy'].astype(str)

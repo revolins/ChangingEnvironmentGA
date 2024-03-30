@@ -17,39 +17,41 @@ conda env create -f environment.yml
 conda activate memGA
 ```
 
-# Test Run Command
+# Test Run Commands
 ```
 python changing_environment_ga.py -o pd_test
 ```
 
-# Static Experiment
+# Static Experiment (Note: Default Number of Tests = 100 or --nt 100)
 ```
-python test_static.py
+python test.py --static --nt 2
 ```
 
 # Low Mutation, Co-Evolutionary Experiment
 ```
-python test_lmr.py
+python test.py --mut_rat 0.01 --nt 2
 ```
 
 # High Mutation, Co-Evolutionary Experiment
 ```
-python test_hmr.py
+python test.py --mut_rat 0.1 --nt 2
 ```
 
-# Command Line Arguments (Required)
-* -o, --output_folder  desired output directory
+# changing_environment_ga.py -- Command Line Arguments
+## (Required)
+* -o, --output_folder   desired output directory
 
-# Command Line Arguments (Optional)
+
+## (Optional)
 * --seed, --s   value to seed runs, for reproducibility
 * --number_of_generations, --ng     number of generations for organisms (DEFAULT = 500)
-* --number_of_organisms, --no   number of organisms involved in a given population (DEFAULT = 10))
+* --number_of_organisms, --no   number of organisms involved in a given population (DEFAULT = 10)
 * --org_type    Type of organism used in experiment, PD uses PDOrg (DEFAULT = pd)
 * --tournament_size, --ts  Size of tournament for competing organisms (DEFAULT = 8)
 * --verbose     True = full output, False = organism output (DEFAULT = True) (?)
 * --number_of_rounds, --nr  Number of rounds in a given tournament before next generation decided (DEFAULT = 64)
-* --temptation, Value of defecting when other organism cooperates (DEFAULT = 5))
-* --reward, Value of cooperating when other organism cooperates (DEFAULT = 5)
+* --temptation, Value of defecting when other organism cooperates (DEFAULT = 5)
+* --reward, Value of cooperating when other organism cooperates (DEFAULT = 3)
 * --punishment, Value of defecting when other organism defects (DEFAULT = 1)
 * --sucker, Value of cooperating when other organism defects (DEFAULT = 0)
 * --proportion_cost_per_memory_bit, --m_c   Fitness cost imposed for each memory bit organism has (DEFAULT = 0.0)
