@@ -1,25 +1,17 @@
 """
-
-
+Static Genotype for restricting strategies to classic strategies
 """
 
 import random
 from collections import deque
-from pd_static_org import StaticOrg, StaticPDGenotype
-#from hybrid_pd_org import HybridPDGenotype
 
-class StochasticPDGenotype(object):
-    def __init__(self, probability=.5, number_of_bits_of_memory=0):
-        self.probability = probability
-        self.number_of_bits_of_memory = number_of_bits_of_memory
-
-class MemoryPDGenotype(object):
+class StaticPDGenotype(object):
     """
     This class creates a genotype.
     """
 
-    def __init__(self, number_of_bits_of_memory, decision_list, initial_memory, args):
-        assert 0 <= number_of_bits_of_memory <= args.max_bits_of_memory
+    def __init__(self, number_of_bits_of_memory, decision_list, initial_memory):
+        assert 0 <= number_of_bits_of_memory <= 4
         assert len(decision_list) == 2 ** number_of_bits_of_memory
         assert len(initial_memory) == number_of_bits_of_memory
         self.number_of_bits_of_memory = number_of_bits_of_memory
@@ -36,7 +28,7 @@ class MemoryPDGenotype(object):
         return not self == other
     
     def __str__(self):
-        return "MemoryPDGenotype({}, {}, {})".format(self.number_of_bits_of_memory,
+        return "StaticPDGenotype({}, {}, {})".format(self.number_of_bits_of_memory,
                                                      self.decision_list,
                                                      self.initial_memory)
     
@@ -49,46 +41,46 @@ class MemoryPDGenotype(object):
             tuple(self.initial_memory))
         return hash(hashable_tuple)
 
-    def get_mutant_of_self(self, args):
+    def get_mutant_of_self(self):
         """
         Determines when and how each type of mutation occurs.
         Returns new (mutated) genotype.
         """
         
         random_value = random.random()
-        if random_value < args.mutation_likelihood_of_bits_of_memory:
-            return self._get_bits_of_memory_mutant(args)
-        if random_value < args.mutation_likelihood_of_bits_of_memory + args.mutation_likelihood_of_initial_memory_state:
-            return self._initial_memory_mutant(args)
-        return self._decision_list_mutant(args)
+        if random_value < 0.0:
+            return self._get_bits_of_memory_mutant()
+        if random_value < 0.0:
+            return self._initial_memory_mutant()
+        return self._decision_list_mutant()
 
 
-    def _get_bits_of_memory_mutant(self, args):
+    def _get_bits_of_memory_mutant(self):
         should_increase_memory = random.choice([True, False])
         if self.number_of_bits_of_memory == 0 and not should_increase_memory:
             return self
-        if self.number_of_bits_of_memory == args.max_bits_of_memory and should_increase_memory:
+        if self.number_of_bits_of_memory == 1 and should_increase_memory:
             return self
         if should_increase_memory:
             new_number_of_bits_of_memory = self.number_of_bits_of_memory + 1
             new_decision_list = self.decision_list * 2
             new_initial_memory = self.initial_memory[:]
             new_initial_memory.append(random.choice([True,False]))
-            return MemoryPDGenotype(new_number_of_bits_of_memory, new_decision_list, new_initial_memory, args)
+            return StaticPDGenotype(new_number_of_bits_of_memory, new_decision_list, new_initial_memory)
         # should decrease memory
         new_number_of_bits_of_memory = self.number_of_bits_of_memory - 1
         length_of_new_decision_list = len(self.decision_list) // 2
         new_decision_list = self.decision_list[:length_of_new_decision_list]
         new_initial_memory = self.initial_memory[:-1]
-        return MemoryPDGenotype(new_number_of_bits_of_memory, new_decision_list, new_initial_memory, args) 
+        return StaticPDGenotype(new_number_of_bits_of_memory, new_decision_list, new_initial_memory) 
         
-    def _decision_list_mutant(self, args):
+    def _decision_list_mutant(self):
         mutation_location = random.randrange(len(self.decision_list))
         new_decision_list = self.decision_list[:]
         new_decision_list[mutation_location] = not new_decision_list[mutation_location]
-        return MemoryPDGenotype(self.number_of_bits_of_memory, new_decision_list, self.initial_memory, args)
+        return StaticPDGenotype(self.number_of_bits_of_memory, new_decision_list, self.initial_memory)
         
-    def _initial_memory_mutant(self, args):
+    def _initial_memory_mutant(self):
         """
         Normally, a single of bit of initial memory is flipped,
         but if there is no memory, no change is made
@@ -98,28 +90,28 @@ class MemoryPDGenotype(object):
         mutation_location = random.randrange(len(self.initial_memory))
         new_initial_memory = self.initial_memory[:]
         new_initial_memory[mutation_location] = not new_initial_memory[mutation_location]
-        return MemoryPDGenotype(self.number_of_bits_of_memory, self.decision_list, new_initial_memory, args)
+        return StaticPDGenotype(self.number_of_bits_of_memory, self.decision_list, new_initial_memory)
 
-class PDOrg(object):
+class StaticOrg(object):
     """
     This class creates a PD organism.
     """
     
     next_org_id = 0
     
-    def __init__(self, args, genotype=None, parent=None):
+    def __init__(self, genotype=None, parent=None):
         if genotype is None:
-            genotype = _create_random_genotype(args)
+            genotype = _create_random_genotype()
         self.genotype = genotype
         self.initialize_memory()
-        self.id = PDOrg.next_org_id
-        PDOrg.next_org_id += 1
+        self.id = StaticOrg.next_org_id
+        StaticOrg.next_org_id += 1
         self.parent = parent
         self.average_payout = None
         
         
-    def get_mutant(self, args):
-        return PDOrg(args, self.genotype.get_mutant_of_self(args), self.id)
+    def get_mutant(self):
+        return StaticOrg(self.genotype.get_mutant_of_self(), self.id)
     
     def __eq__(self, other):
         return self.genotype == other.genotype
@@ -128,7 +120,7 @@ class PDOrg(object):
         return not self == other
     
     def __str__(self):
-        return "PDOrg({})".format(self.genotype)
+        return "StaticOrg({})".format(self.genotype)
     
     def __repr__(self):
         return str(self)
@@ -161,52 +153,16 @@ class PDOrg(object):
         
     def initialize_memory(self):
         self.memory = deque(self.genotype.initial_memory)
-        
-class PDStochasticOrg(PDOrg):
-    """
-    """
-    next_org_id = 0
-
-    def __init__(self, genotype=None, parent=None):
-        if genotype is None:
-            genotype = StochasticPDGenotype()
-        self.genotype = genotype
-        self.id = PDStochasticOrg.next_org_id
-        PDStochasticOrg.next_org_id += 1
-        self.parent = parent
-        self.average_payout = None
-    
-    def get_mutant(self):
-        new_genotype = random.random()
-        return PDStochasticOrg(new_genotype, self.id)
-    
-    def _str_(self):
-        return "PDStochasticOrg({})".format(self.genotype)
-
-    def will_cooperate(self):
-        return self.genotype.probability > random.random()
-
-    def store_bit_of_memory(self, did_cooperate):
-        pass
-    
-    def initialize_memory(self):
-        pass
    
             
-def _create_random_genotype(args):
+def _create_random_genotype():
     """
     Creates random memory PD genotype
     
-    Used by PDOrg as default returned genotype
+    Used by StaticOrg as default returned genotype
     """
-    number_of_bits_of_memory = random.randrange(args.max_bits_of_memory + 1)
+    number_of_bits_of_memory = random.randrange(5)
     length = 2 ** number_of_bits_of_memory
     decision_list = [random.choice([True, False]) for _ in range(length)]
     initial_memory = [random.choice([True, False]) for _ in range(number_of_bits_of_memory)]
-    return MemoryPDGenotype(number_of_bits_of_memory, decision_list, initial_memory, args)
-
-
-ALL_DEFECT = StaticOrg(StaticPDGenotype(0, [False], []))
-TIT_FOR_TAT = StaticOrg(StaticPDGenotype(1, [False, True], [True]))
-COIN_FLIP = PDStochasticOrg()
-STATIC_COMPETITORS = [ALL_DEFECT, TIT_FOR_TAT, COIN_FLIP]
+    return StaticPDGenotype(number_of_bits_of_memory, decision_list, initial_memory)

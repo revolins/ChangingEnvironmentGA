@@ -6,10 +6,6 @@ import pd_tournament
 import random
 import pd_org
 
-# Parameter is set through set_global_variables() in main.py
-# This determines the number of organisms per tournament
-TOURNAMENT_SIZE = None
-
 def get_best_half(organisms):
     """Returns a list of the top half of the organisms in terms of payout"""
     # Sort organisms based on payout in descending order
@@ -19,26 +15,26 @@ def get_best_half(organisms):
     # Return copy of selected best half
     return best_half_orgs[:]
 
-def get_number_of_tournaments(organisms):
+def get_number_of_tournaments(args, organisms):
     """
     Calculate number of tournaments needed given a list of organisms 
     and predefined tournament size.
     """
     # Determine number of full tournaments
-    number_of_tournaments = len(organisms) // TOURNAMENT_SIZE
+    number_of_tournaments = len(organisms) // args.tournament_size
     # Check for remaining organisms
-    if len(organisms) % TOURNAMENT_SIZE:
+    if len(organisms) % args.tournament_size:
         # One additional tournament for remaining organisms
         number_of_tournaments += 1
     return number_of_tournaments
 
 
-def get_contender_generator(organisms):
+def get_contender_generator(args, organisms):
     """
     Given a list of organisms, returns generator function that yields batches of
     contenders for tournaments.
     """
-    number_of_tournaments = get_number_of_tournaments(organisms)  
+    number_of_tournaments = get_number_of_tournaments(args, organisms)  
 
     def generate_contenders(organisms):
         """Shuffle the organisms then group them into TOURNAMENT_SIZEd clumps"""
@@ -49,27 +45,27 @@ def get_contender_generator(organisms):
             for i in range(number_of_tournaments):
                 # Slicing ensures each tournament has the right number of organisms
                 # Yield "returns" each batch one at a time, not all at once
-                yield organisms[TOURNAMENT_SIZE * i: TOURNAMENT_SIZE * (i + 1)]    
+                yield organisms[args.tournament_size * i: args.tournament_size * (i + 1)]    
     return generate_contenders(organisms)
     
-def get_next_generation_by_selection(organisms):
+def get_next_generation_by_selection(args, organisms):
     """
     COEVOLUTIONARY MODE
     Conducts tournaments and calculate average payout.
     Calls _get_next_generation() to select organisms for the next generation.
     """
     # Determine number of tournaments to run
-    number_of_tournaments = get_number_of_tournaments(organisms)
+    number_of_tournaments = get_number_of_tournaments(args, organisms)
 
     # Define generator to yield contenders
-    contender_generator = get_contender_generator(organisms)
+    contender_generator = get_contender_generator(args, organisms)
     
     # In each tournament
     for _ in range(number_of_tournaments):
         # Obtain next batch of contenders
         contenders = next(contender_generator)
         # Get average payouts for this tournament, update organism attributes
-        pd_tournament.get_average_payouts(contenders)
+        pd_tournament.get_average_payouts(args, contenders)
     
     # All organisms should have updated average payouts by this point
     # Select organisms for the next generation
@@ -93,15 +89,15 @@ def _get_next_generation(organisms, contender_generator):
     # Ensure next_generation has the same length as organisms
     return next_generation[:len(organisms)]
     
-def get_next_generation_by_static_payout(organisms):
+def get_next_generation_by_static_payout(args, organisms):
     """
     STATIC MODE
     Calculate average payouts against non-evolving opponents.
     Calls _get_next_generation() to select organisms for the next generation.
     """
     # Get payouts from playing against static competitors
-    pd_tournament.get_static_payouts(organisms, pd_org.STATIC_COMPETITORS)
+    pd_tournament.get_static_payouts(args, organisms, pd_org.STATIC_COMPETITORS)
     # Set up contender generator
-    contender_generator = get_contender_generator(organisms)
+    contender_generator = get_contender_generator(args, organisms)
     # Select organisms for the next generation
     return _get_next_generation(organisms, contender_generator)

@@ -5,6 +5,8 @@ import pandas
 import os
 import argparse
 
+from tqdm import tqdm
+
 def join_path(output_folder, filename):
         return os.path.join(output_folder, filename)
 
@@ -126,7 +128,7 @@ def build_strat_csv(output_folder):
                                   'pd-7.0_']
     
     print("Compiling Strategy Results")
-    for paths in glob.glob(join_path(output_folder, "*")):
+    for paths in tqdm(glob.glob(join_path(output_folder, "*"))):
         #print("Start: ", paths)
         if any(filter(lambda x: x in paths, values_do_not_want)):
             continue

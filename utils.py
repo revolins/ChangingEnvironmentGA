@@ -6,54 +6,30 @@ This module contains methods to evolve IPD strategies.
 
 from __future__ import division
 import random
-from string import ascii_uppercase
 import csv
-import OLD.string_org as string_org
-import OLD.real_value_vector_org as real_value_vector_org
-import scipy.stats as stats
-import OLD.old_fitness_function as ff
-from math import floor
 import os
-import shutil
-import numpy as np
 import datetime
 import pd_selection
 import pd_analysis
-import pd_tournament
 import pd_org
 import pd_make_detail_file
 
-FITNESS_FUNCTION_TYPE = None
-NUMBER_OF_ORGANISMS = None
-MUTATION_RATE = None
-NUMBER_OF_GENERATIONS = None
-ORG_TYPE = None
-TOURNAMENT_SIZE = None
-VERBOSE = False
-ALTERNATE_ENVIRONMENT_CORR = None
-START_TIME = None
-CROWDING = False # True to activate Crowding Selection
-OUTPUT_FOLDER = None
-OUTPUT_FREQUENCY = None
-SELECTION_BY_STATIC_COMPETITOR = False # True to activate static environment
-RANDOMIZED_ROUNDS = False
-
-def create_initial_population():
+def create_initial_population(args):
     """
     Create a starting population by forming a list of randomly generated organisms.
     """
-    org_type_map = {"string": string_org.StringOrg, "vector": real_value_vector_org.RealValueVectorOrg, "pd": pd_org.PDOrg} # , "hybrid_pd": pd_org.HybridPDOrg
-    if ORG_TYPE in org_type_map:
-        return [org_type_map[ORG_TYPE]() for _ in range(NUMBER_OF_ORGANISMS)]
+    org_type_map = {"pd": pd_org.PDOrg(args=args), "hybrid_pd": pd_org.PDOrg(args=args)} 
+    if args.org_type in org_type_map:
+        return [org_type_map[args.org_type] for _ in range(args.number_of_organisms)]
     
-def get_mutated_population(population):
+def get_mutated_population(args, population):
     """
     Return a new population with a percentage of organisms mutated based on the mutation rate.
     """
     new_population = []
     for org in population:
-        if random.random() < MUTATION_RATE:
-            new_org = org.get_mutant()
+        if random.random() < args.mutation_rate:
+            new_org = org.get_mutant(args)
             new_population.append(new_org)
         else:
             new_population.append(org)
@@ -64,7 +40,7 @@ def print_status(generation, population, environment):
     average_fitness = get_average_fitness(population, environment)
     print("Gen = {}  Pop = {}  Fit = {}".format(generation, population, average_fitness))
 
-def pd_evolve_population():
+def pd_evolve_population(args):
     """
     Evolution loop for PD org representation
     Returns data for "bits_of_memory_overtime.csv"
@@ -73,12 +49,12 @@ def pd_evolve_population():
     past_organisms = {}
 
     # Create initial population
-    organisms = create_initial_population()
+    organisms = create_initial_population(args)
 
     # Prepare header for output data
     output = []
     headers = []
-    for i in range(pd_org.MAX_BITS_OF_MEMORY + 1):
+    for i in range(args.max_bits_of_memory + 1):
         headers.append("Organisms With " + str(i) + " Bits of Memory")
     output.append(headers)
 
@@ -96,21 +72,21 @@ def pd_evolve_population():
 
     # Create detail file for first generation
     # There should be no parent data at this point
-    pd_make_detail_file.make_file_detail(organisms, past_organisms, 0, OUTPUT_FOLDER)
+    pd_make_detail_file.make_file_detail(organisms, past_organisms, 0, args.output_folder[0])
     
-    for i in range(NUMBER_OF_GENERATIONS):
+    for i in range(args.number_of_generations):
         # Static Mode       
-        if SELECTION_BY_STATIC_COMPETITOR: 
-            organisms = pd_selection.get_next_generation_by_static_payout(organisms)
+        if args.selection_by_static_competitor: 
+            organisms = pd_selection.get_next_generation_by_static_payout(args, organisms)
         # Coevolutionary Mode
         else: 
-            organisms = pd_selection.get_next_generation_by_selection(organisms)
+            organisms = pd_selection.get_next_generation_by_selection(args, organisms)
         # Mutate populataion
-        organisms = get_mutated_population(organisms)
+        organisms = get_mutated_population(args, organisms)
 
         # Calculates, for each generation, the count of organisms with memory lengths 
         # spanning from 0 to MAX_BITS_OF_MEMORY + 1. 
-        output.append(pd_analysis.get_tally_of_number_of_bits_of_memory(organisms))
+        output.append(pd_analysis.get_tally_of_number_of_bits_of_memory(args, organisms))
 
         # Adding more into existing dictionary
         # TODO: Why does this work? Why does the dictionary length remain unchanged? 
@@ -124,8 +100,8 @@ def pd_evolve_population():
                 past_organisms[org] = [org]
 
         # Make detail file every OUTPUT_FREQUENCY generations
-        if ( (i + 1) % OUTPUT_FREQUENCY == 0):
-            pd_make_detail_file.make_file_detail(organisms, past_organisms, i + 1, OUTPUT_FOLDER)
+        if ( (i + 1) % args.output_frequency == 0):
+            pd_make_detail_file.make_file_detail(organisms, past_organisms, i + 1, args.output_folder[0])
 
     return output
 
@@ -135,51 +111,6 @@ def get_average_fitness(pop, environment):
     for org in pop:
         total += org.fitness(environment)
     return total / len(pop)
-
-
-def set_global_variables(config):
-    """Sets all the global variables based on a config file"""
-    # Added to config from command line
-    global OUTPUT_FOLDER
-    OUTPUT_FOLDER = config.get("DEFAULT", "output_folder")
-    global START_TIME
-    START_TIME = config.getfloat("DEFAULT", "start_time")
-
-    # Default Values
-    global SEED
-    SEED = config.getint("DEFAULT", "seed")
-    random.seed(SEED)
-    np.random.seed(SEED)
-    global VERBOSE
-    VERBOSE = config.getboolean("DEFAULT", "verbose")
-    global NUMBER_OF_ORGANISMS
-    NUMBER_OF_ORGANISMS = config.getint("DEFAULT", "number_of_organisms")
-    global NUMBER_OF_GENERATIONS
-    NUMBER_OF_GENERATIONS = config.getint("DEFAULT", "number_of_generations")
-    global ORG_TYPE
-    ORG_TYPE = config.get("DEFAULT", "org_type")
-    global MUTATION_RATE
-    MUTATION_RATE = config.getfloat("DEFAULT", "mutation_rate")
-    global OUTPUT_FREQUENCY
-    OUTPUT_FREQUENCY = config.getint("DEFAULT", "output_frequency")
-
-    if ORG_TYPE == "pd":
-        global SELECTION_BY_STATIC_COMPETITOR
-        SELECTION_BY_STATIC_COMPETITOR = config.getboolean("DEFAULT", "selection_by_static_competitor")
-        pd_tournament.NUMBER_OF_ROUNDS = config.getint("DEFAULT", "number_of_rounds")
-        pd_tournament.RANDOMIZED_ROUNDS = config.getboolean("DEFAULT", "randomized_rounds")
-        pd_tournament.SEED = config.getint("DEFAULT", "seed")
-        pd_tournament.NOISE = config.getfloat("DEFAULT", "noise")
-        pd_tournament.TEMPTATION = config.getint("DEFAULT", "temptation")
-        pd_tournament.REWARD = config.getint("DEFAULT", "reward")
-        pd_tournament.PUNISHMENT = config.getint("DEFAULT", "punishment")
-        pd_tournament.SUCKER = config.getint("DEFAULT", "sucker")
-        pd_tournament.PROPORTION_COST_PER_MEMORY_BIT = config.getfloat("DEFAULT", "proportion_cost_per_memory_bit")
-        pd_tournament.TOGGLE_SELF_MEMORY_ON = config.getboolean("DEFAULT", "toggle_self_memory_on")
-        pd_selection.TOURNAMENT_SIZE = config.getint("DEFAULT", "tournament_size")
-        pd_org.MAX_BITS_OF_MEMORY = config.getint("DEFAULT", "max_bits_of_memory")
-        pd_org.MUTATION_LIKELIHOOD_OF_BITS_OF_MEMORY = config.getfloat("DEFAULT", "mutation_likelihood_of_bits_of_memory")
-        pd_org.MUTATION_LIKELIHOOD_OF_INITIAL_MEMORY_STATE = config.getfloat("DEFAULT", "mutation_likelihood_of_initial_memory_state")
 
 def save_table_to_file(table, filename):
     """Write a table to a file"""
@@ -192,23 +123,17 @@ def save_string_to_file(string, filename):
     with open(filename, "w") as f:
         f.write(string)
 
-def join_path(filename):
-        return os.path.join(OUTPUT_FOLDER, filename)
+def join_path(args, filename):
+        return os.path.join(args.output_folder[0], filename)
 
-def generate_data():
+def generate_data(args):
     """The main function; generates all the data"""
     # Create output folder for storing every component of the experiment
-    if os.path.exists(OUTPUT_FOLDER):
-        raise IOError("output_folder: {} already exists".format(OUTPUT_FOLDER))
-    os.makedirs(OUTPUT_FOLDER)
+    if os.path.exists(args.output_folder[0]):
+        raise IOError("output_folder: {} already exists".format(args.output_folder[0]))
+    os.makedirs(args.output_folder[0])
     
-    if ORG_TYPE == "pd":
-        output = pd_evolve_population()
-        output_filename = join_path("bits_of_memory_overtime.csv")
+    if args.org_type == "pd" or args.org_type == "hybrid_pd":
+        output = pd_evolve_population(args)
+        output_filename = join_path(args, "bits_of_memory_overtime.csv")
         save_table_to_file(output, output_filename)
-        
-    time_filename = join_path("time.dat")     
-    start_time = datetime.datetime.fromtimestamp(START_TIME)
-    end_time = datetime.datetime.now()
-    time_str = "Start_time {}\nEnd_time {}\nDuration {}\n".format(start_time, end_time, end_time - start_time)
-    save_string_to_file(time_str, time_filename)
