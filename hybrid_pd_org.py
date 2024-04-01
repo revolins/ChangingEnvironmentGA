@@ -155,7 +155,7 @@ class HybridPDGenotype(object):
 
         return HybridPDGenotype(self.number_of_bits_of_memory, self.number_of_bits_of_summary, self.decision_list, new_initial_memory, new_initial_summary)
       
-def _create_random_genotype():
+def _create_random_genotype(args):
     """
     Creates random memory PD genotype
     

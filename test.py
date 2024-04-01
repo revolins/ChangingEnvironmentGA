@@ -7,8 +7,7 @@ def det_output(args):
     folder_str = 'pd'
     if args.hybrid:
         folder_str = folder_str + "hybrid"
-    if args.static:
-        args.mut_rat = 0.0
+    elif args.static:
         folder_str = folder_str + "static"
     else:
         folder_str = folder_str + "coev"
@@ -35,7 +34,7 @@ def format_cmd(args):
     temp_cmd = []
     if args.static:
         temp_cmd.append("--static")
-    if args.mut_rat > 0.0 and not args.static:
+    if args.mut_rat > 0.0:
         temp_cmd.extend(["--mr", str(args.mut_rat)])
     if args.noise > 0.0:
         temp_cmd.extend(["--noise", str(args.noise)])

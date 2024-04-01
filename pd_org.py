@@ -5,7 +5,6 @@
 
 import random
 from collections import deque
-from pd_static_org import StaticOrg, StaticPDGenotype
 #from hybrid_pd_org import HybridPDGenotype
 
 class StochasticPDGenotype(object):
@@ -205,8 +204,8 @@ def _create_random_genotype(args):
     initial_memory = [random.choice([True, False]) for _ in range(number_of_bits_of_memory)]
     return MemoryPDGenotype(number_of_bits_of_memory, decision_list, initial_memory, args)
 
-
-ALL_DEFECT = StaticOrg(StaticPDGenotype(0, [False], []))
-TIT_FOR_TAT = StaticOrg(StaticPDGenotype(1, [False, True], [True]))
-COIN_FLIP = PDStochasticOrg()
-STATIC_COMPETITORS = [ALL_DEFECT, TIT_FOR_TAT, COIN_FLIP]
+def static_opponents(args):
+    all_defect = PDOrg(args=args, genotype=MemoryPDGenotype(0, [False], [], args))
+    tit_for_tat = PDOrg(args=args, genotype=MemoryPDGenotype(1, [False, True], [True], args))
+    coin_flip = PDStochasticOrg()
+    return [all_defect, tit_for_tat, coin_flip]

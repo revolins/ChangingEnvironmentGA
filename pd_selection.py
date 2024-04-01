@@ -96,7 +96,7 @@ def get_next_generation_by_static_payout(args, organisms):
     Calls _get_next_generation() to select organisms for the next generation.
     """
     # Get payouts from playing against static competitors
-    pd_tournament.get_static_payouts(args, organisms, pd_org.STATIC_COMPETITORS)
+    pd_tournament.get_static_payouts(args, organisms, pd_org.static_opponents(args))
     # Set up contender generator
     contender_generator = get_contender_generator(args, organisms)
     # Select organisms for the next generation
