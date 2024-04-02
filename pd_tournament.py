@@ -8,17 +8,17 @@ import itertools
 import numpy as np
 import random
 
-NUMBER_OF_ROUNDS = 64
+NUMBER_OF_ROUNDS = None
 RANDOMIZED_ROUNDS = False
-SEED = 500
-NOISE = 0.0
+SEED = None
+NOISE = None
 
 TEMPTATION = 5
 REWARD = 3
 PUNISHMENT = 1
 SUCKER = 0
 
-PROPORTION_COST_PER_MEMORY_BIT = .01
+PROPORTION_COST_PER_MEMORY_BIT = None
 
 TOGGLE_SELF_MEMORY_ON = False
 
@@ -99,7 +99,11 @@ def adjusted_payout(organism_a, organism_b):
     Returns adjusted payout reward for each organism
     """
     def proportion_cost(org):
-        return PROPORTION_COST_PER_MEMORY_BIT * org.genotype.number_of_bits_of_memory
+        #print("************ PRPO MEMORY BIT COST *************", PROPORTION_COST_PER_MEMORY_BIT, flush=True)
+        if org.genotype.__type__ == 'hybrid':
+            return PROPORTION_COST_PER_MEMORY_BIT * (org.genotype.number_of_bits_of_memory + org.genotype.number_of_bits_summary)
+        else:
+            return PROPORTION_COST_PER_MEMORY_BIT * org.genotype.number_of_bits_of_memory
     
     def get_adjusted_payout(payout, proportion_cost):
         return payout * (1 - proportion_cost)
@@ -150,4 +154,4 @@ def get_static_fitness(org, static_competitors):
     
     payouts = [adjusted_payout(org, comp)[0] for comp in static_competitors]
 
-    return sum(payouts) / (len(payouts) * 1.0)
+    return sum(payouts) / (float(len(payouts)))

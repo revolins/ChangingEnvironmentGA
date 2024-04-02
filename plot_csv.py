@@ -105,10 +105,10 @@ def average_mem(output_folder):
             print("Wilcox Test Failed, results likely identical - can be fixed with more tests")
     f.close()
 
-def strat_freq(output_folder):
+def strat_freq(args):
     print("Constructing Strategy Frequency Plot")
-    strategies_df = pd.read_csv(join_path(output_folder, "strategies_df.csv"), header=None)
-    column_names = ['Row_Label'] + list(range(0, 501, 10)) + ['Condition', 'Strategy']
+    strategies_df = pd.read_csv(join_path(str(args.output_folder), "strategies_df.csv"), header=None)
+    column_names = ['Row_Label'] + list(range(0, int(args.number_of_generations) + 1, int(args.output_frequency))) + ['Condition', 'Strategy']
     strategies_df.columns = column_names
 
     strategies_df.drop('Row_Label', axis=1, inplace=True)
@@ -123,7 +123,7 @@ def strat_freq(output_folder):
     plt.gca().set_facecolor('white') 
     plt.legend().set_visible(True)  
     plt.tight_layout()  
-    plt.savefig(join_path(output_folder, "Strategy_Frequency_Plot.png"))  
+    plt.savefig(join_path(str(args.output_folder), "Strategy_Frequency_Plot.png"))  
 
 def common_strats(output_folder):
     print("Constructing Common Strategy Plot")
@@ -158,10 +158,12 @@ def main():
     
     # Expects 1 argument: output folder
     arg_parser.add_argument("-o", "--output_folder", type=str, default="tests/pd_temp")
+    arg_parser.add_argument("--output_frequency", type=int, default=10)
+    arg_parser.add_argument("--number_of_generations", type=int, default=500)
     args = arg_parser.parse_args()
 
     average_mem(args.output_folder)
-    strat_freq(args.output_folder)
+    strat_freq(args)
     common_strats(args.output_folder)
     
 

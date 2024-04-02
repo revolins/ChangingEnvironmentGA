@@ -16,6 +16,9 @@ class StochasticPDGenotype(object):
         self.probability = probability
         self.number_of_bits_of_memory = number_of_bits_of_memory
 
+    def __type__(self):
+        return 'stochastic'
+
 class MemoryPDGenotype(object):
     """
     This class creates a genotype.
@@ -51,6 +54,9 @@ class MemoryPDGenotype(object):
             tuple(self.decision_list), 
             tuple(self.initial_memory))
         return hash(hashable_tuple)
+    
+    def __type__(self):
+        return 'memory'
 
     def get_mutant_of_self(self):
         """
@@ -165,12 +171,6 @@ class PDOrg(object):
     def initialize_memory(self):
         self.memory = deque(self.genotype.initial_memory)
         
-    def fitness(self, environment):
-        raise NotImplementedError()
-    
-    def is_better_than(self, other, environment):
-        raise NotImplementedError()
-        
 class PDStochasticOrg(PDOrg):
     """
     """
@@ -200,12 +200,6 @@ class PDStochasticOrg(PDOrg):
     
     def initialize_memory(self):
         pass
-    
-    def fitness(self, environment):
-        raise NotImplementedError()
-    
-    def is_better_than(self, other, environment):
-        raise NotImplementedError()
    
             
 def _create_random_genotype():

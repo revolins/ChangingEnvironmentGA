@@ -4,6 +4,15 @@ import re
 import pandas
 import os
 import argparse
+import sys
+maxInt = sys.maxsize
+
+while True:
+  try:
+      csv.field_size_limit(maxInt)
+      break
+  except OverflowError:
+      maxInt = int(maxInt/10)
 
 def join_path(output_folder, filename):
         return os.path.join(output_folder, filename)

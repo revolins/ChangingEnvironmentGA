@@ -46,9 +46,19 @@ def format_cmd(args):
 
     return temp_cmd
 
+def build_plt_cmd(args):
+    temp_cmd = []
+    if args.output_frequency != 10:
+        temp_cmd.extend(["--output_frequency", str(args.output_frequency)])
+    if args.number_of_generations != 500:
+        temp_cmd.extend(["--number_of_generations", str(args.number_of_generations)])
+
+    return temp_cmd
+
 def run_test(args):
     output_folder, test_type = det_output(args)
     temp_cmd = format_cmd(args)
+    temp_str = build_plt_cmd(args)
 
     mem_cost = ['0.0', '0.01', '0.05', '0.075', '0.2']
     print("Initiating Seeded Run")
@@ -56,11 +66,14 @@ def run_test(args):
         for cost in mem_cost:
             default_cmd = ["python", "changing_environment_ga.py", "--seed", f"{i}", "--m_c", cost, "-o", f"{output_folder}/pd_{test_type}test{i}_{cost}_cost"]
             if len(temp_cmd) > 0: default_cmd.extend(temp_cmd)
+            if len(temp_str) > 0: default_cmd.extend(temp_str)
 
             subprocess.run(default_cmd)
 
     subprocess.run(["python", "compile_csv.py", "-o", output_folder])
-    subprocess.run(["python", "plot_csv.py", "-o", output_folder])
+    plot_str = ["python", "plot_csv.py", "-o", output_folder]
+    if len(temp_str) > 0: plot_str.extend(temp_str)
+    subprocess.run(plot_str)
 
     print(f"Experiment Concluded, results stored in {output_folder}")
 
@@ -74,6 +87,8 @@ def main():
     arg_parser.add_argument("--noise", "--n", type=float, default=0.0, help="(float) (DEFAULT = 0.0) Percent Likelihood the one of the opposing organisms moves is misread")
     arg_parser.add_argument("--random_nr", "--rnr", action='store_true', default=False, help="(bool) (DEFAULT=False) Specify if number of tournament rounds are randomized in a single game")
     arg_parser.add_argument("--hybrid", action='store_true', default=False, help="(bool) (DEFAULT = False) original memory model (FALSE), hybrid memory model (TRUE)")
+    arg_parser.add_argument("--number_of_generations", "--ng", type=int, default=500, help="(int) (DEFAULT = 500) number of generations selected upon after a tournament")
+    arg_parser.add_argument("--output_frequency", "--of", type=int, default=10, help="(int) (DEFAULT = 10) Determines the organisms output to the detail-*.csv, where * is the generation number")
     args = arg_parser.parse_args()  
     
     run_test(args)

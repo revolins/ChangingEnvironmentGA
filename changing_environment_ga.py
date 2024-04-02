@@ -1,9 +1,7 @@
 import configparser
 import argparse
 from utils import set_global_variables, generate_data
-from string import ascii_uppercase
 import time 
-import os
 
 def parse_everything(command_line_args=None):
     """Parse command line arguments"""
@@ -14,7 +12,7 @@ def parse_everything(command_line_args=None):
     arg_parser.add_argument("-o", "--output_folder", nargs=1)
     arg_parser.add_argument("--seed", "--s", type=str, default=str(int(time.time())))
     arg_parser.add_argument("--number_of_generations", "--ng",  type=str, default="500")
-    arg_parser.add_argument("--number_of_organisms", "--no",  type=str, default="10")
+    arg_parser.add_argument("--number_of_organisms", "--no",  type=str, default="200")
     arg_parser.add_argument("--org_type", type=str, default="pd")
     arg_parser.add_argument("--tournament_size", "--ts",  type=str, default="8")
     arg_parser.add_argument("--verbose", action='store_true', default=False)
@@ -30,7 +28,7 @@ def parse_everything(command_line_args=None):
     arg_parser.add_argument("--mutation_likelihood_of_initial_memory_state", "--ml_dec", type=str, default="1.0")
     arg_parser.add_argument("--toggle_self_memory_on", action='store_true', default=False)
     arg_parser.add_argument("--mutation_rate", "--mr",  type=str, default="0.00")
-    arg_parser.add_argument("--output_frequency", type=str, default="10")
+    arg_parser.add_argument("--output_frequency", type=str, default="1")
     arg_parser.add_argument("--selection_by_static_competitor", "--static", action="store_true", default=False)
     arg_parser.add_argument("--randomized_rounds", action="store_true", default=False)
     arg_parser.add_argument("--noise", type=str, default="0.0")

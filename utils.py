@@ -21,6 +21,7 @@ import pd_selection
 import pd_analysis
 import pd_tournament
 import pd_org
+import hybrid_pd_org
 import pd_make_detail_file
 
 FITNESS_FUNCTION_TYPE = None
@@ -42,7 +43,7 @@ def create_initial_population():
     """
     Create a starting population by forming a list of randomly generated organisms.
     """
-    org_type_map = {"string": string_org.StringOrg, "vector": real_value_vector_org.RealValueVectorOrg, "pd": pd_org.PDOrg} # , "hybrid_pd": pd_org.HybridPDOrg
+    org_type_map = {"pd": pd_org.PDOrg, "hybrid_pd": hybrid_pd_org.HybridPDOrg} # "string": string_org.StringOrg, "vector": real_value_vector_org.RealValueVectorOrg, 
     if ORG_TYPE in org_type_map:
         return [org_type_map[ORG_TYPE]() for _ in range(NUMBER_OF_ORGANISMS)]
     
