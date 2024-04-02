@@ -7,6 +7,7 @@ import argparse
 
 from scipy import stats
 from statsmodels.stats.multicomp import pairwise_tukeyhsd, MultiComparison
+from tqdm import tqdm
 
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning) #For those pesky deprecation warnings
@@ -14,13 +15,13 @@ warnings.simplefilter(action='ignore', category=FutureWarning) #For those pesky 
 def join_path(output_folder, filename):
         return os.path.join(output_folder, filename)
 
-def average_mem(output_folder):
+def average_mem(args):
     print("Constructing Memory Plots and Running Statistical Tests")
-    bits_of_memory_df = pd.read_csv(join_path(output_folder, "all_bits_df_static_comp_more_values.csv"))
+    bits_of_memory_df = pd.read_csv(join_path(args.output_folder, "all_bits_df_static_comp_more_values.csv"))
     bits_of_memory_df.replace([np.inf, -np.inf], np.nan, inplace=True)
-    print(bits_of_memory_df.columns.tolist())
+    #print(bits_of_memory_df.columns.tolist())
     bits_of_memory_df.columns = ['Row_Label', 'B0', 'B1', 'B2', 'B3', 'B4', 'Condition', 'Generation']
-    print(bits_of_memory_df.columns.tolist())
+    #print(bits_of_memory_df.columns.tolist())
     bits_of_memory_df.drop(['Row_Label'], axis=1, inplace=True)
     bits_of_memory_df['Generation'] = pd.to_numeric(bits_of_memory_df['Generation'], errors='coerce')
     bits_of_memory_df['Condition'] = pd.Categorical(pd.to_numeric(bits_of_memory_df['Condition'], errors='coerce'))
@@ -52,7 +53,7 @@ def average_mem(output_folder):
     plt.title('Average Bits of Memory Over Time')
     plt.ylabel('Average Bits of Memory')
     plt.grid(False)
-    plt.savefig(join_path(output_folder, 'Average_Memory.png'))
+    plt.savefig(join_path(args.output_folder, 'Average_Memory.png'))
 
     palette = sns.color_palette("husl", len(conditions))
     plt.figure(figsize=(10, 6))
@@ -60,49 +61,53 @@ def average_mem(output_folder):
     plt.title('Average Bits of Memory Over Time')
     plt.ylabel('Average Bits of Memory')
     plt.grid(False)
-    plt.savefig(join_path(output_folder, 'Average_Memory_NoDashes.png'))
+    plt.savefig(join_path(args.output_folder, 'Average_Memory_NoDashes.png'))
 
     plt.figure(figsize=(10, 6))
     plt.hist(bits_of_memory_df['Mean'], bins=30)
     plt.title('Distribution of Mean Bits of Memory')
     plt.xlabel('Mean Bits of Memory')
     plt.ylabel('Frequency')
-    plt.savefig(join_path(output_folder, 'Mean_Memory.png'))
+    plt.savefig(join_path(args.output_folder, 'Mean_Memory.png'))
 
-    with open(join_path(output_folder, "stat_output.txt"), "w") as f:
+    with open(join_path(args.output_folder, "stat_output.txt"), "w") as f:
         try:
             anova_results = stats.f_oneway(*[group['Mean'].values for name, group in bits_of_memory_df.groupby('Condition', observed=True)])
             f.writelines(f'ANOVA test results: {anova_results}')
             f.write('\n')
-            print(f'ANOVA test results: {anova_results}')
         except:
-            print("ANOVA test failed, likely needs more tests")
+            f.write("ANOVA test failed, likely needs more tests")
+            f.write('\n')
+            print("ANOVA test failed, likely needs more tests", flush=True)
 
         try:
             tukey_results = pairwise_tukeyhsd(bits_of_memory_df['Mean'], bits_of_memory_df['Condition'])
             f.writelines(f'Tukey test results: {tukey_results}')
             f.write('\n')
-            print(f'Tukey test results: {tukey_results}')
         except:
-            print("Tukey test failed, likely needs more tests")
+            f.write("Tukey test failed, likely needs more tests")
+            f.write('\n')
+            print("Tukey test failed, likely needs more tests", flush=True)
 
         try:
-            kruskal_data = bits_of_memory_df[bits_of_memory_df['Generation'] == 499]
+            kruskal_data = bits_of_memory_df[bits_of_memory_df['Generation'] == int(args.number_of_generations) - 1]
             kruskal_results = stats.kruskal(*[group['Mean'].values for name, group in kruskal_data.groupby('Condition', observed=True)])
             f.writelines(f'Kruskal-Wallis test results: {kruskal_results}')
             f.write('\n')
-            print(f'Kruskal-Wallis test results: {kruskal_results}')
         except:
-            print("Kruskal-Wallis Test Failed, results likely identical - can be fixed with more tests")
+            f.write("Kruskal-Wallis Test Failed, results likely identical - can be fixed with more tests")
+            f.write('\n')
+            print("Kruskal-Wallis Test Failed, results likely identical - can be fixed with more tests", flush=True)
 
         try:
             comparison = MultiComparison(kruskal_data['Mean'], kruskal_data['Condition'])
             wilcox_results = comparison.allpairtest(stats.mannwhitneyu, method='bonferroni')
             f.writelines(f'Bonferroni-Corrected Kruskal/Wilcox Test Results: {wilcox_results[0]}')
             f.write('\n')
-            print(f'Bonferroni-Corrected Kruskal/Wilcox Test Results: {wilcox_results[0]}')
         except:
-            print("Wilcox Test Failed, results likely identical - can be fixed with more tests")
+            f.write("Wilcox Test Failed, results likely identical - can be fixed with more tests")
+            f.write('\n')
+            print("Wilcox Test Failed, results likely identical - can be fixed with more tests", flush=True)
     f.close()
 
 def strat_freq(args):
@@ -145,7 +150,7 @@ def common_strats(output_folder):
     plt.xticks(rotation=10)
     plt.xlabel('Strategy')
     plt.ylabel('Frequency')
-    plt.legend().set_visible(True)
+    #plt.legend().set_visible(True)
     plt.grid(axis='y')
 
     for container in plt.gca().containers:
@@ -162,7 +167,7 @@ def main():
     arg_parser.add_argument("--number_of_generations", type=int, default=500)
     args = arg_parser.parse_args()
 
-    average_mem(args.output_folder)
+    average_mem(args)
     strat_freq(args)
     common_strats(args.output_folder)
     

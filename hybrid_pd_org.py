@@ -6,7 +6,7 @@ Two types of representations are available: MemoryPDGenotype and HybridPDGenotyp
 import random
 from collections import deque
 
-# Parameters are set through set_global_variables() in main.py 
+# Parameters are set through set_global_variables() in utils.py 
 MAX_BITS_OF_MEMORY = None
 MAX_BITS_OF_SUMMARY = None
 MUTATION_LIKELIHOOD_OF_BITS_OF_MEMORY = None
@@ -64,6 +64,7 @@ class HybridPDGenotype(object):
         return hash(hashable_tuple) # We don't consider IDs and parents, only strategy
     
     def __type__(self):
+        """Return type as string for easy checking"""
         return 'hybrid'
 
     def get_mutant_of_self(self):
@@ -112,8 +113,8 @@ class HybridPDGenotype(object):
             new_decision_list = 2 * self.decision_list
             
             # Fill the rest of the new list with random decisions
-            for i in range(length_of_new_decision_list - len(new_decision_list)):
-                new_decision_list.append(random.choice([True, False]))
+            # for i in range(length_of_new_decision_list - len(new_decision_list)):
+            #     new_decision_list.append(random.choice([True, False]))
 
             # Add 1 extra bit to initial memory
             new_initial_memory = self.initial_memory[:]
@@ -124,14 +125,11 @@ class HybridPDGenotype(object):
             new_initial_summary.append(random.choice([True, False]))
 
             return HybridPDGenotype(new_number_of_bits_of_memory, new_number_of_bits_of_summary, new_decision_list, new_initial_memory, new_initial_summary)
-        
-        # TODO: Current bug, decreasing memory out of order? Unlikely
-        # length of decision list causes cascading issues after generations? More likely
-        # Slicing necessary for summary and memory? Unlikely
 
         # If we decrease memory length
         new_number_of_bits_of_memory = self.number_of_bits_of_memory - 1 # (k)
         new_number_of_bits_of_summary = self.number_of_bits_of_summary - 1 # (j)
+        #length_of_new_decision_list = len(self.decision_list) // 2
         length_of_new_decision_list = 2 ** new_number_of_bits_of_memory * (new_number_of_bits_of_summary + 1) # (2^k(j+1))
         
         # Update size of memory and decision lists, most distant past memory bits removed
@@ -171,8 +169,8 @@ class HybridPDGenotype(object):
 
 class HybridPDOrg(object):
     """
-    This class creates a PD organism.
-    A PD organism consists of a genotype, ID, parent, and average payout. 
+    This class creates a HyrbidPD organism.
+    A HybridPD organism consists of a genotype, ID, parent, and average payout. 
     """
     
     next_org_id = 0
@@ -226,6 +224,11 @@ class HybridPDOrg(object):
         else:
             binary_string_index = "".join("1" if i else "0" for i in self.memory)
             decision_list_index = int(binary_string_index, 2)
+        print("************* self.memory ***************", self.memory, flush=True)
+        print("************* binary string index ***************", binary_string_index, flush=True)
+        print("************* length: genotype decision list ****************: ", len(self.genotype.decision_list), flush=True)
+        print("************* genotype decision list ****************: ", self.genotype.decision_list, flush=True)
+        print("************* decision list index ****************: ", decision_list_index, flush=True)
         return self.genotype.decision_list[decision_list_index]
        
     def store_bit_of_memory(self, did_cooperate):
@@ -239,6 +242,9 @@ class HybridPDOrg(object):
     def initialize_memory(self):
         """Get double-ended queue memory"""
         self.memory = deque(self.genotype.initial_memory + self.genotype.initial_summary) # makes a copy
+    
+    def fitness(self, environment):
+        raise NotImplementedError()
    
             
 def _create_random_genotype():

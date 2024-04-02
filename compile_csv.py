@@ -5,6 +5,9 @@ import pandas
 import os
 import argparse
 import sys
+
+from tqdm import tqdm
+
 maxInt = sys.maxsize
 
 while True:
@@ -22,20 +25,15 @@ def build_experiment_csv(output_folder):
     all_bits_df = pandas.DataFrame()
 
     print("Compiling Experimental Memory Results")
-    for individual_file in list_of_bits:
-        #print("Current File Split (/) : ", str(individual_file.split("/")[-1]))
+    for individual_file in tqdm(list_of_bits):
         Condition = individual_file.split("/")[-1]
-        #print("Condition Split (-) : ", str(Condition.split("_")))
-        #print("4th Condition Split index : ", str(Condition.split("_")[4]))
         Condition = Condition.split("_")[4]
-        #print("Condition : ", str(Condition))
         
         individual_file_df = pandas.read_csv(individual_file)
         individual_file_df['Condition'] = [Condition] * individual_file_df.shape[0]
         individual_file_df['Generation'] = range(individual_file_df.shape[0])
         all_bits_df = all_bits_df._append(individual_file_df)
     
-    #print individual_file.split("/")[-2], len(individual_file_df), all_bits_df.shape[0]
     all_bits_df.to_csv(join_path(output_folder, 'all_bits_df_static_comp_more_values.csv'), header=True)
 
 def make_strategy_dictionary(fileregx):
@@ -135,23 +133,19 @@ def build_strat_csv(output_folder):
                                   'pd-7.0_']
     
     print("Compiling Strategy Results")
-    for paths in glob.glob(join_path(output_folder, "*")):
-        #print("Start: ", paths)
+    for paths in tqdm(glob.glob(join_path(output_folder, "*"))):
         if any(filter(lambda x: x in paths, values_do_not_want)):
             continue
         if (os.path.isdir(paths)):
             strategies_df, most_common = make_strategy_dictionary(paths)
             frames.append(strategies_df)
             most_common = format_common_strat(most_common)
-            #print("Finished: " + str(paths))
             list_most_common += ",".join(most_common) + "\n"
 
     with open(join_path(output_folder, "most_common.csv"), "w") as most_common_file:
         for item in list_most_common:
             most_common_file.write(item)
 
-    #strategies_df = pandas.concat(frames)
-    #print("Strategies DF: ", strategies_df)
     strategies_df.to_csv(join_path(output_folder, "strategies_df.csv"), header=False)
 
 def main():
