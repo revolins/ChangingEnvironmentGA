@@ -5,8 +5,6 @@ Detail files contain information on each PD org within a generation.
 
 import csv
 
-# TODO: make sure this is compatible with new hybrid memory model
-
 # Master function to call all the helpers
 def make_file_detail(organisms, past_organisms, current_generation, filepath):
     """
@@ -29,7 +27,9 @@ def make_file_detail(organisms, past_organisms, current_generation, filepath):
 
     # Create csv writer
     filename = filepath + '/detail-' + str(current_generation) + '.csv'
-    header = ['Bits' , 'Decisions' , 'Memory' , 'Alive' , 'Id' , 'ParentId']
+    if organisms[-1].genotype.__type__ == 'hybrid':
+        header = ['MemBits' , 'SumBits' , 'Decisions' , 'Memory' , 'Summary' , 'Alive' , 'Id' , 'ParentId']
+    else: header = ['Bits' , 'Decisions' , 'Memory' , 'Alive' , 'Id' , 'ParentId']
 
     # Put data where we want it
     data = []
@@ -38,9 +38,15 @@ def make_file_detail(organisms, past_organisms, current_generation, filepath):
     for key in past_organisms:
         row = []
         row.append(key.genotype.number_of_bits_of_memory)
-        #row.append(key.genotype.number_of_bits_of_summary)
+
+        if organisms[-1].genotype.__type__ == 'hybrid':
+            row.append(key.genotype.number_of_bits_of_summary)
+
         row.append(key.genotype.decision_list)
         row.append(key.genotype.initial_memory)
+
+        if organisms[-1].genotype.__type__ == 'hybrid':
+            row.append(key.genotype.initial_summary)
 
         # Count number of organisms alive with the same strategy
         number_alive = 0

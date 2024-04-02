@@ -3,7 +3,6 @@ This module takes two PD orgs and determines
 their score in an iterated Prisoner's Dilemma
 """
 
-import pd_org
 import itertools
 import numpy as np
 import random
@@ -60,8 +59,7 @@ def run_game(organism_a, organism_b):
     if RANDOMIZED_ROUNDS:
         # Size 500 to match NUMBER_OF_GENERATIONS, scale=3 for full scope of std. dev., mean set to NUMBER_OF_ROUNDS
         curr_num_rounds = np.random.choice(list(np.random.default_rng(seed=SEED).normal(loc=NUMBER_OF_ROUNDS, scale=3, size=500).astype(int)))
-        if curr_num_rounds <= 0:
-            raise AssertionError(f"Number of Randomized Rounds - {curr_num_rounds} is too low, scale or loc requires adjustment")
+        if curr_num_rounds <= 0: raise AssertionError(f"Number of Randomized Rounds - {curr_num_rounds} is too low, scale or loc requires adjustment")
     else:
         curr_num_rounds = NUMBER_OF_ROUNDS
     
