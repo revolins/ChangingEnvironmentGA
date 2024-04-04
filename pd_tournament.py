@@ -103,8 +103,8 @@ def adjusted_payout(organism_a, organism_b):
     Returns adjusted payout reward (applied cost) for both organisms
     """
     def proportion_cost(org):
-        if org.genotype.__type__ == 'hybrid':
-            return PROPORTION_COST_PER_MEMORY_BIT * (org.genotype.number_of_bits_of_memory + org.genotype.number_of_bits_summary)
+        if org.genotype.type() == 'hybrid':
+            return PROPORTION_COST_PER_MEMORY_BIT * (org.genotype.number_of_bits_of_memory + org.genotype.number_of_bits_of_summary)
         else:
             return PROPORTION_COST_PER_MEMORY_BIT * org.genotype.number_of_bits_of_memory
     

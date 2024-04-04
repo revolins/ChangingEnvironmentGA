@@ -63,7 +63,7 @@ class HybridPDGenotype(object):
             tuple(self.initial_summary))
         return hash(hashable_tuple) # We don't consider IDs and parents, only strategy
     
-    def __type__(self):
+    def type(self):
         """Return type as string for easy checking"""
         return 'hybrid'
 
@@ -113,8 +113,8 @@ class HybridPDGenotype(object):
             new_decision_list = 2 * self.decision_list
             
             # Fill the rest of the new list with random decisions
-            # for i in range(length_of_new_decision_list - len(new_decision_list)):
-            #     new_decision_list.append(random.choice([True, False]))
+            for i in range(length_of_new_decision_list - len(new_decision_list)):
+                new_decision_list.append(random.choice([True, False]))
 
             # Add 1 extra bit to initial memory
             new_initial_memory = self.initial_memory[:]
@@ -129,7 +129,10 @@ class HybridPDGenotype(object):
         # If we decrease memory length
         new_number_of_bits_of_memory = self.number_of_bits_of_memory - 1 # (k)
         new_number_of_bits_of_summary = self.number_of_bits_of_summary - 1 # (j)
-        #length_of_new_decision_list = len(self.decision_list) // 2
+        
+        # TODO: Currently, the decision list shrinks after subtracting from bits of summary and memory.
+        # Wouldn't we expect the list to shrink inverse of it's original size? Like the following function?
+        #length_of_new_decision_list = (len(self.decision_list) // 2) // (len(self.number_of_bits_of_summary) + 1)
         length_of_new_decision_list = 2 ** new_number_of_bits_of_memory * (new_number_of_bits_of_summary + 1) # (2^k(j+1))
         
         # Update size of memory and decision lists, most distant past memory bits removed
@@ -161,9 +164,12 @@ class HybridPDGenotype(object):
         new_initial_memory[mutation_location] = not new_initial_memory[mutation_location]
 
         # Mutate in summary memory
-        mutation_location = random.randrange(len(self.initial_summary))
+        # TODO: Fix Summary Memory mutation, does it need to be called separately?
+        # TODO: Dont we expect to combine memory and summary at one point? Wouldnt that make only memory important instead of just summary? 
+        # Is it necessary to mutate summary at all given this condition? Can we split summary from memory?
+        #mutation_location = random.randrange(len(self.initial_summary))
         new_initial_summary = self.initial_summary[:]
-        new_initial_summary[mutation_location] = not new_initial_summary[mutation_location]
+        #new_initial_summary[mutation_location] = not new_initial_summary[mutation_location]
 
         return HybridPDGenotype(self.number_of_bits_of_memory, self.number_of_bits_of_summary, self.decision_list, new_initial_memory, new_initial_summary)
 
@@ -224,11 +230,18 @@ class HybridPDOrg(object):
         else:
             binary_string_index = "".join("1" if i else "0" for i in self.memory)
             decision_list_index = int(binary_string_index, 2)
-        print("************* self.memory ***************", self.memory, flush=True)
-        print("************* binary string index ***************", binary_string_index, flush=True)
-        print("************* length: genotype decision list ****************: ", len(self.genotype.decision_list), flush=True)
-        print("************* genotype decision list ****************: ", self.genotype.decision_list, flush=True)
-        print("************* decision list index ****************: ", decision_list_index, flush=True)
+        # print("************************** NEW ORGANISM GENOTYPE ********************************", flush=True)
+        # print("************* self.memory ***************", self.memory)
+        # if self.memory:
+        #     print("************* binary string index ***************", binary_string_index)
+        # print("************* length: genotype decision list ****************: ", len(self.genotype.decision_list))
+        # print("************* genotype decision list ****************: ", self.genotype.decision_list)
+        # print("************* decision list index ****************: ", decision_list_index, flush=True)
+        # TODO: Temporary fix so that decision list index never exceeds that number of bits of memory. Could be linked to how summary and memory are treated. 
+        # Decision List does not grow at the same rate as the memory althogh decision list is dependent on memory, treat all decisions as a part of summary or combine with memory?
+        # M
+        if len(self.genotype.decision_list) <= decision_list_index:
+            decision_list_index = len(self.genotype.decision_list) - 1
         return self.genotype.decision_list[decision_list_index]
        
     def store_bit_of_memory(self, did_cooperate):

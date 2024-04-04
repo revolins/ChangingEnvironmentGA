@@ -98,7 +98,7 @@ def pd_evolve_population():
     pd_make_detail_file.make_file_detail(organisms, past_organisms, 0, OUTPUT_FOLDER)
     
     for i in range(NUMBER_OF_GENERATIONS):
-        # Static Mode       
+        # Static Mode     
         if SELECTION_BY_STATIC_COMPETITOR: 
             organisms = pd_selection.get_next_generation_by_static_payout(organisms)
         # Coevolutionary Mode
@@ -110,7 +110,7 @@ def pd_evolve_population():
         # Calculates, for each generation, the count of organisms with memory lengths 
         # spanning from 0 to MAX_BITS_OF_MEMORY + 1. 
         mem_output.append(pd_analysis.get_tally_of_number_of_bits_of_memory(organisms))
-        if organisms[-1].genotype.__type__ == 'hybrid':
+        if organisms[-1].genotype.type() == 'hybrid':
             sum_output.append(pd_analysis.get_tally_of_number_of_bits_summary(organisms))
 
         # Adding more into existing dictionary
@@ -185,10 +185,6 @@ def set_global_variables(config):
         pd_tournament.PROPORTION_COST_PER_MEMORY_BIT = config.getfloat("DEFAULT", "proportion_cost_per_memory_bit")
         pd_tournament.TOGGLE_SELF_MEMORY_ON = config.getboolean("DEFAULT", "toggle_self_memory_on")
         pd_selection.TOURNAMENT_SIZE = config.getint("DEFAULT", "tournament_size")
-        hybrid_pd_org.MAX_BITS_OF_SUMMARY = config.getint("DEFAULT", "max_bits_of_summary")
-        #pd_org.MAX_BITS_OF_MEMORY = config.getint("DEFAULT", "max_bits_of_memory")
-        #pd_org.MUTATION_LIKELIHOOD_OF_BITS_OF_MEMORY = config.getfloat("DEFAULT", "mutation_likelihood_of_bits_of_memory")
-        #pd_org.MUTATION_LIKELIHOOD_OF_INITIAL_MEMORY_STATE = config.getfloat("DEFAULT", "mutation_likelihood_of_initial_memory_state")
 
 def save_table_to_file(table, filename):
     """Write a table to a file"""

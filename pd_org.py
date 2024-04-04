@@ -17,7 +17,7 @@ class StochasticPDGenotype(object):
         self.probability = probability
         self.number_of_bits_of_memory = number_of_bits_of_memory
 
-    def __type__(self):
+    def type(self):
         return 'stochastic'
 
 class MemoryPDGenotype(object):
@@ -61,7 +61,7 @@ class MemoryPDGenotype(object):
             tuple(self.initial_memory))
         return hash(hashable_tuple)
     
-    def __type__(self):
+    def type(self):
         """Return type as string for easy checking"""
         return 'memory'
 
@@ -200,6 +200,12 @@ class PDOrg(object):
         else:
             binary_string_index = "".join("1" if i else "0" for i in self.memory)
             decision_list_index = int(binary_string_index, 2)
+        print("************* self.memory ***************", self.memory)
+        print("************* binary string index ***************", binary_string_index)
+        print("************* length: genotype decision list ****************: ", len(self.genotype.decision_list))
+        print("************* genotype decision list ****************: ", self.genotype.decision_list)
+        print("************* decision list index ****************: ", decision_list_index, flush=True)
+        print("*****************************************************************************************************************************************************", flush=True)
         return self.genotype.decision_list[decision_list_index]
        
     def store_bit_of_memory(self, did_cooperate):

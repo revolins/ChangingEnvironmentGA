@@ -27,7 +27,7 @@ def make_file_detail(organisms, past_organisms, current_generation, filepath):
 
     # Create csv writer
     filename = filepath + '/detail-' + str(current_generation) + '.csv'
-    if organisms[-1].genotype.__type__ == 'hybrid':
+    if organisms[-1].genotype.type() == 'hybrid':
         header = ['MemBits' , 'SumBits' , 'Decisions' , 'Memory' , 'Summary' , 'Alive' , 'Id' , 'ParentId']
     else: header = ['Bits' , 'Decisions' , 'Memory' , 'Alive' , 'Id' , 'ParentId']
 
@@ -39,13 +39,13 @@ def make_file_detail(organisms, past_organisms, current_generation, filepath):
         row = []
         row.append(key.genotype.number_of_bits_of_memory)
 
-        if organisms[-1].genotype.__type__ == 'hybrid':
+        if organisms[-1].genotype.type() == 'hybrid':
             row.append(key.genotype.number_of_bits_of_summary)
 
         row.append(key.genotype.decision_list)
         row.append(key.genotype.initial_memory)
 
-        if organisms[-1].genotype.__type__ == 'hybrid':
+        if organisms[-1].genotype.type() == 'hybrid':
             row.append(key.genotype.initial_summary)
 
         # Count number of organisms alive with the same strategy
