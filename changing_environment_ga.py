@@ -2,6 +2,7 @@ import configparser
 import argparse
 from utils import set_global_variables, generate_data
 import time 
+import random
 
 def parse_everything(command_line_args=None):
     """Parse command line arguments"""
@@ -10,7 +11,7 @@ def parse_everything(command_line_args=None):
     
     # Expects 1 argument: output folder
     arg_parser.add_argument("-o", "--output_folder", nargs=1)
-    arg_parser.add_argument("--seed", "--s", type=str, default=str(int(time.time())))
+    arg_parser.add_argument("--seed", "--s", type=str, default=str(random.randint(0, int(time.time()))))
     arg_parser.add_argument("--number_of_generations", "--ng",  type=str, default="500")
     arg_parser.add_argument("--number_of_organisms", "--no",  type=str, default="10")
     arg_parser.add_argument("--org_type", type=str, default="pd")
@@ -24,8 +25,8 @@ def parse_everything(command_line_args=None):
     arg_parser.add_argument("--proportion_cost_per_memory_bit", "--m_c", type=str, default="0.0")
     arg_parser.add_argument("--max_bits_of_memory", "--max_m", type=str, default="4")
     arg_parser.add_argument("--max_bits_of_summary", "--max_s", type=str, default="4")
-    arg_parser.add_argument("--mutation_likelihood_of_bits_of_memory", "--ml_mem",  type=str, default="0.5")
-    arg_parser.add_argument("--mutation_likelihood_of_initial_memory_state", "--ml_dec", type=str, default="0.5")
+    arg_parser.add_argument("--mutation_likelihood_of_bits_of_memory", "--ml_mem",  type=str, default="0.1")
+    arg_parser.add_argument("--mutation_likelihood_of_initial_memory_state", "--ml_dec", type=str, default="0.1")
     arg_parser.add_argument("--toggle_self_memory_on", action='store_true', default=False)
     arg_parser.add_argument("--mutation_rate", "--mr",  type=str, default="0.00")
     arg_parser.add_argument("--output_frequency", type=str, default="10")

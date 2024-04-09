@@ -200,12 +200,12 @@ class PDOrg(object):
         else:
             binary_string_index = "".join("1" if i else "0" for i in self.memory)
             decision_list_index = int(binary_string_index, 2)
-        print("************* self.memory ***************", self.memory)
-        print("************* binary string index ***************", binary_string_index)
-        print("************* length: genotype decision list ****************: ", len(self.genotype.decision_list))
-        print("************* genotype decision list ****************: ", self.genotype.decision_list)
-        print("************* decision list index ****************: ", decision_list_index, flush=True)
-        print("*****************************************************************************************************************************************************", flush=True)
+        # print("************* self.memory ***************", self.memory)
+        # print("************* binary string index ***************", binary_string_index)
+        # print("************* length: genotype decision list ****************: ", len(self.genotype.decision_list))
+        # print("************* genotype decision list ****************: ", self.genotype.decision_list)
+        # print("************* decision list index ****************: ", decision_list_index, flush=True)
+        # print("*****************************************************************************************************************************************************", flush=True)
         return self.genotype.decision_list[decision_list_index]
        
     def store_bit_of_memory(self, did_cooperate):

@@ -64,7 +64,8 @@ def run_test(args):
     print("Initiating Seeded Run")
     for i in tqdm(range(1, args.num_test + 1)):
         for cost in mem_cost:
-            default_cmd = ["python", "changing_environment_ga.py", "--seed", f"{i}", "--m_c", cost, "-o", f"{output_folder}/pd_{test_type}test{i}_{cost}_cost"]
+            default_cmd = ["python", "changing_environment_ga.py", "--m_c", cost, "-o", f"{output_folder}/pd_{test_type}test{i}_{cost}_cost"]
+            if not args.ignore_matching: default_cmd.extend(["--seed", f"{i}"])
             if len(temp_cmd) > 0: default_cmd.extend(temp_cmd)
             if len(temp_str) > 0: default_cmd.extend(temp_str)
 
@@ -89,6 +90,7 @@ def main():
     arg_parser.add_argument("--hybrid", action='store_true', default=False, help="(bool) (DEFAULT = False) original memory model (FALSE), hybrid memory model (TRUE)")
     arg_parser.add_argument("--number_of_generations", "--ng", type=int, default=500, help="(int) (DEFAULT = 500) number of generations selected upon after a tournament")
     arg_parser.add_argument("--output_frequency", "--of", type=int, default=10, help="(int) (DEFAULT = 10) Determines the organisms output to the detail-*.csv, where * is the generation number")
+    arg_parser.add_argument("--ignore_matching", "--ms", action='store_true', default=False, help="(bool) (DEFAULT = False) If the experiment will match seeds to the runs")
     args = arg_parser.parse_args()  
     
     run_test(args)
