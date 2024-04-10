@@ -86,7 +86,7 @@ class HybridPDGenotype(object):
 
     def _get_bits_of_memory_mutant(self):
         """
-        Increase or decrease length of initial (specific) and summary memory by 1 bit each.
+        Increase or decrease length of initial specific and summary memory by 1 bit each.
         Affects length of decision list as well. 
         """
         should_increase_memory = random.choice([True, False])
