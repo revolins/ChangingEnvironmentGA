@@ -91,19 +91,37 @@ class HybridPDGenotype(object):
         """
         should_increase_memory = random.choice([True, False])
 
-        # If organism has no memory, don't decrease memory
-        if (self.number_of_bits_of_memory == 0 or self.number_of_bits_of_summary == 0) and not should_increase_memory:
+        # If organism has no specific and summed memory, don't decrease anything
+        if (self.number_of_bits_of_memory == 0 and self.number_of_bits_of_summary == 0) and not should_increase_memory:
             return self
         
-        # If organism has maximum memory length, don't increase memory
-        if (self.number_of_bits_of_memory == MAX_BITS_OF_MEMORY or self.number_of_bits_of_summary == MAX_BITS_OF_SUMMARY) and should_increase_memory:
-            #Return full normal memory but hybrid relies on 2*k * (j+1)
+        # If organism has maximum specific and summed memory, don't increase anything
+        if (self.number_of_bits_of_memory == MAX_BITS_OF_MEMORY and self.number_of_bits_of_summary == MAX_BITS_OF_SUMMARY) and should_increase_memory:
             return self
         
         # If we increase memory length
         if should_increase_memory:
-            new_number_of_bits_of_memory = self.number_of_bits_of_memory + 1 # (k) 
-            new_number_of_bits_of_summary = self.number_of_bits_of_summary + 1 # (j)
+
+            # Specific memory (k)
+            new_number_of_bits_of_memory = self.number_of_bits_of_memory
+            new_initial_memory = self.initial_memory[:]
+            # Increase specific memory if less than max
+            if self.number_of_bits_of_memory < MAX_BITS_OF_MEMORY:
+                # Update length
+                new_number_of_bits_of_memory = self.number_of_bits_of_memory + 1 
+                # Add 1 extra bit to initial memory
+                new_initial_memory.append(random.choice([True,False]))
+
+            # Summed memory (j)
+            new_number_of_bits_of_summary = self.number_of_bits_of_summary
+            new_initial_summary = self.initial_summary[:]
+            # Increase summed memory if less than max 
+            if self.number_of_bits_of_summary < MAX_BITS_OF_SUMMARY:
+                # Update length
+                new_number_of_bits_of_summary = self.number_of_bits_of_summary + 1  
+                # Add 1 extra bit to summary memory
+                new_initial_summary.append(random.choice([True, False]))
+
             # Length of new decision list 2^k(j+1)
             length_of_new_decision_list = 2 ** new_number_of_bits_of_memory * (new_number_of_bits_of_summary + 1)
             
@@ -116,30 +134,43 @@ class HybridPDGenotype(object):
             for i in range(length_of_new_decision_list - len(new_decision_list)):
                 new_decision_list.append(random.choice([True, False]))
 
-            # Add 1 extra bit to initial memory
-            new_initial_memory = self.initial_memory[:]
-            new_initial_memory.append(random.choice([True,False]))
-
-            # Add 1 extra bit to summary memory
-            new_initial_summary = self.initial_summary[:]
-            new_initial_summary.append(random.choice([True, False]))
+            # SANITY CHECK
+            assert len(new_decision_list) == length_of_new_decision_list, "DECISION LIST LENGTH DON'T MATCH (INCREASING)"
 
             return HybridPDGenotype(new_number_of_bits_of_memory, new_number_of_bits_of_summary, new_decision_list, new_initial_memory, new_initial_summary)
 
         # If we decrease memory length
-        new_number_of_bits_of_memory = self.number_of_bits_of_memory - 1 # (k)
-        new_number_of_bits_of_summary = self.number_of_bits_of_summary - 1 # (j)
+
+        # Specific memory (k)
+        new_number_of_bits_of_memory = self.number_of_bits_of_memory
+        new_initial_memory = self.initial_memory[:]
+        # Decrease specific memory if larger than 0
+        if self.number_of_bits_of_memory > 0:
+            new_number_of_bits_of_memory = self.number_of_bits_of_memory - 1 
+            # Remove most distant memory bit
+            new_initial_memory = self.initial_memory[:-1]
+
+        # Summed memory (j)
+        new_number_of_bits_of_summary = self.number_of_bits_of_summary
+        new_initial_summary = self.initial_summary[:]
+        # Decrease summed memory if larger than 0
+        if self.number_of_bits_of_summary > 0:
+            new_number_of_bits_of_summary = self.number_of_bits_of_summary - 1
+            # Remove most distant memory bit
+            new_initial_summary = self.initial_summary[:-1]
+
+        # Length of new decision list (2^k(j+1))
+        length_of_new_decision_list = 2 ** new_number_of_bits_of_memory * (new_number_of_bits_of_summary + 1) 
         
+        # Decrease decision list
+        new_decision_list = self.decision_list[:length_of_new_decision_list]
+
+        # SANITY CHECK
+        assert len(new_decision_list) == length_of_new_decision_list, "DECISION LIST LENGTH DON'T MATCH (DECREASING)"
+
         # TODO: Currently, the decision list shrinks after subtracting from bits of summary and memory.
         # Wouldn't we expect the list to shrink inverse of it's original size? Like the following function?
         #length_of_new_decision_list = (len(self.decision_list) // 2) // (len(self.number_of_bits_of_summary) + 1)
-        length_of_new_decision_list = 2 ** new_number_of_bits_of_memory * (new_number_of_bits_of_summary + 1) # (2^k(j+1))
-        
-        # Update size of memory and decision lists, most distant past memory bits removed
-        new_decision_list = self.decision_list[:length_of_new_decision_list]
-        new_initial_memory = self.initial_memory[:-1]
-        new_initial_summary = self.initial_summary[:-1]
-
         return HybridPDGenotype(new_number_of_bits_of_memory, new_number_of_bits_of_summary, new_decision_list, new_initial_memory, new_initial_summary) 
         
     def _decision_list_mutant(self):
@@ -151,26 +182,37 @@ class HybridPDGenotype(object):
         
     def _initial_memory_mutant(self):
         """
-        Randomly flip a single bit in both initial specified and summary memory.
+        Randomly flip a single bit in initial specific and summed memory.
         This affects the state of memory the organism starts with.  
         """
-        # If there is no memory, no change is made.
-        if self.number_of_bits_of_memory == 0:
+        # TODO: If organisms have the option to use specific, summary memory, or both,
+        # mutations should be applied to both types of memory. 
+        # Otherwise, organisms relying solely on summary memory might not mutate frequently enough
+        # if mutations are only applied to specific memory.
+        # Splitting this into two functions is possible, but this approach is simpler.
+
+        # No changes if there is no memory
+        if self.number_of_bits_of_memory + self.number_of_bits_of_summary == 0:
             return self
         
-        # Mutate in specified memory
-        mutation_location = random.randrange(len(self.initial_memory))
         new_initial_memory = self.initial_memory[:]
-        new_initial_memory[mutation_location] = not new_initial_memory[mutation_location]
+        # If there is specific memory
+        if self.number_of_bits_of_memory > 0:
+            # Mutate in specific memory
+            mutation_location = random.randrange(len(self.initial_memory))
+            new_initial_memory[mutation_location] = not new_initial_memory[mutation_location]
 
-        # Mutate in summary memory
+        new_initial_summary = self.initial_summary[:]
+        # If there is summary memory
+        if self.number_of_bits_of_summary > 0:
+            # Mutate in summary memory
+            mutation_location = random.randrange(len(self.initial_summary))
+            new_initial_summary[mutation_location] = not new_initial_summary[mutation_location]
+
         # TODO: Fix Summary Memory mutation, does it need to be called separately?
         # TODO: Dont we expect to combine memory and summary at one point? Wouldnt that make only memory important instead of just summary? 
         # Is it necessary to mutate summary at all given this condition? Can we split summary from memory?
         #mutation_location = random.randrange(len(self.initial_summary))
-        new_initial_summary = self.initial_summary[:]
-        #new_initial_summary[mutation_location] = not new_initial_summary[mutation_location]
-
         return HybridPDGenotype(self.number_of_bits_of_memory, self.number_of_bits_of_summary, self.decision_list, new_initial_memory, new_initial_summary)
 
 class HybridPDOrg(object):
@@ -178,7 +220,6 @@ class HybridPDOrg(object):
     This class creates a HyrbidPD organism.
     A HybridPD organism consists of a genotype, ID, parent, and average payout. 
     """
-    
     next_org_id = 0
     
     def __init__(self, genotype=None, parent=None):
@@ -187,6 +228,7 @@ class HybridPDOrg(object):
         self.genotype = genotype
         self.memory = None
         self.initialize_memory()
+        print(self.memory)
         self.id = HybridPDOrg.next_org_id
         HybridPDOrg.next_org_id += 1
         self.parent = parent
@@ -220,28 +262,51 @@ class HybridPDOrg(object):
     def will_cooperate(self):
         """
         Returns True if organism will cooperate, else False for defection
-        
-        First convert self.memory to a binary string ("101")
-        Then, convert binary string to integer (5)
-        Return value of decision list at index
         """
+        # No specific or summary memory
         if not self.memory:
             decision_list_index = 0
+
+        # At least specific or summary memory
         else:
-            binary_string_index = "".join("1" if i else "0" for i in self.memory)
-            decision_list_index = int(binary_string_index, 2)
-        # print("************************** NEW ORGANISM GENOTYPE ********************************", flush=True)
-        # print("************* self.memory ***************", self.memory)
-        # if self.memory:
-        #     print("************* binary string index ***************", binary_string_index)
-        # print("************* length: genotype decision list ****************: ", len(self.genotype.decision_list))
-        # print("************* genotype decision list ****************: ", self.genotype.decision_list)
-        # print("************* decision list index ****************: ", decision_list_index, flush=True)
-        # TODO: Temporary fix so that decision list index never exceeds that number of bits of memory. Could be linked to how summary and memory are treated. 
-        # Decision List does not grow at the same rate as the memory althogh decision list is dependent on memory, treat all decisions as a part of summary or combine with memory?
-        # M
-        if len(self.genotype.decision_list) <= decision_list_index:
-            decision_list_index = len(self.genotype.decision_list) - 1
+            # Length of initial specific memory (k)
+            len_memory = self.genotype.number_of_bits_of_memory
+            assert len(self.genotype.initial_memory) == self.genotype.number_of_bits_of_memory
+
+            # If specific memory exists
+            if len_memory > 0:
+                print("k= ", len_memory)
+                # Convert specific memory into binary string (True: 1, False: 0)
+                binary_string = "".join("1" if i else "0" for i in list(self.memory)[:len_memory])
+                # Convert binary string into integer
+                binary_index = int(binary_string, 2)
+                print("binary string index= ", binary_index)
+
+                # Count number of cooperate (True) moves in summed memory
+                # summary_index is 0 if summed memory is empty
+                summary_index = sum(1 for i in list(self.memory)[len_memory:] if i==True)
+                print("summary index= ", summary_index)
+
+                # Which "block" does binary_index belong to?
+                # If summary memory doesn't exist, works like PDOrg
+                decision_list_index = binary_index + 2 ** len_memory * summary_index
+
+            # If specified memory doesn't exist, summary memory has to at least exist
+            else:
+                assert len(self.genotype.initial_summary) > 0
+
+                # In this case, decision list has size (j+1)
+                decision_list_index = sum(1 for i in self.memory if i==True)
+
+                assert decision_list_index <= (self.genotype.number_of_bits_of_summary + 1)
+
+
+        print("************************** NEW ORGANISM GENOTYPE ********************************", flush=True)
+        print("self.memory= ", self.memory)            
+        print("length: genotype decision list= ", len(self.genotype.decision_list))
+        print("genotype decision list= ", self.genotype.decision_list)
+        print("decision list index= ", decision_list_index, flush=True)
+
         return self.genotype.decision_list[decision_list_index]
        
     def store_bit_of_memory(self, did_cooperate):
@@ -254,8 +319,8 @@ class HybridPDOrg(object):
         
     def initialize_memory(self):
         """Get double-ended queue memory"""
-        self.memory = deque(self.genotype.initial_memory + self.genotype.initial_summary) # makes a copy
-    
+        self.memory = deque(self.genotype.initial_memory + self.genotype.initial_summary)
+
     def fitness(self, environment):
         raise NotImplementedError()
    
@@ -266,6 +331,8 @@ def _create_random_genotype():
     
     Used by HybridPDOrg as default returned genotype
     """
+    # randrange generate number in range [0, MAX_BITS_OF_MEMORY]
+    # This implies that organisms have the option to use specific, summary memory, or both
     number_of_bits_of_memory = random.randrange(MAX_BITS_OF_MEMORY + 1)
     number_of_bits_of_summary = random.randrange(MAX_BITS_OF_SUMMARY + 1)
     length = 2 ** number_of_bits_of_memory * (number_of_bits_of_summary + 1)
