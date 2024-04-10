@@ -25,7 +25,7 @@ def average_mem(args):
     bits_of_memory_df.drop(['Row_Label'], axis=1, inplace=True)
     bits_of_memory_df['Generation'] = pd.to_numeric(bits_of_memory_df['Generation'], errors='coerce')
     bits_of_memory_df['Condition'] = pd.Categorical(pd.to_numeric(bits_of_memory_df['Condition'], errors='coerce'))
-    for col in ['B0', 'B1', 'B2', 'B3', 'B4']:
+    for col in tqdm(['B0', 'B1', 'B2', 'B3', 'B4']):
         bits_of_memory_df[col] = pd.to_numeric(bits_of_memory_df[col], errors='coerce')
 
     weights = np.arange(5)
@@ -47,8 +47,8 @@ def average_mem(args):
         color = palette[i]
         
         ax.fill_between(x=df_condition['Generation'],
-                        y1=df_condition['group_mean'] - df_condition['group_sd'],
-                        y2=df_condition['group_mean'] + df_condition['group_sd'],
+                        y1=df_condition['group_mean'] - (df_condition['group_sd'] / 5 ),
+                        y2=df_condition['group_mean'] + (df_condition['group_sd'] / 5 ),
                         color=color, alpha=0.3)
     plt.title('Average Bits of Memory Over Time')
     plt.ylabel('Average Bits of Memory')

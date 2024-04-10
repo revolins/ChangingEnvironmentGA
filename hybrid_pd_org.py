@@ -228,7 +228,7 @@ class HybridPDOrg(object):
         self.genotype = genotype
         self.memory = None
         self.initialize_memory()
-        print(self.memory)
+        # print(self.memory)
         self.id = HybridPDOrg.next_org_id
         HybridPDOrg.next_org_id += 1
         self.parent = parent
@@ -275,17 +275,17 @@ class HybridPDOrg(object):
 
             # If specific memory exists
             if len_memory > 0:
-                print("k= ", len_memory)
+                # print("k= ", len_memory)
                 # Convert specific memory into binary string (True: 1, False: 0)
                 binary_string = "".join("1" if i else "0" for i in list(self.memory)[:len_memory])
                 # Convert binary string into integer
                 binary_index = int(binary_string, 2)
-                print("binary string index= ", binary_index)
+                # print("binary string index= ", binary_index)
 
                 # Count number of cooperate (True) moves in summed memory
                 # summary_index is 0 if summed memory is empty
                 summary_index = sum(1 for i in list(self.memory)[len_memory:] if i==True)
-                print("summary index= ", summary_index)
+                # print("summary index= ", summary_index)
 
                 # Which "block" does binary_index belong to?
                 # If summary memory doesn't exist, works like PDOrg
@@ -301,11 +301,11 @@ class HybridPDOrg(object):
                 assert decision_list_index <= (self.genotype.number_of_bits_of_summary + 1)
 
 
-        print("************************** NEW ORGANISM GENOTYPE ********************************", flush=True)
-        print("self.memory= ", self.memory)            
-        print("length: genotype decision list= ", len(self.genotype.decision_list))
-        print("genotype decision list= ", self.genotype.decision_list)
-        print("decision list index= ", decision_list_index, flush=True)
+        # print("************************** NEW ORGANISM GENOTYPE ********************************", flush=True)
+        # print("self.memory= ", self.memory)            
+        # print("length: genotype decision list= ", len(self.genotype.decision_list))
+        # print("genotype decision list= ", self.genotype.decision_list)
+        # print("decision list index= ", decision_list_index, flush=True)
 
         return self.genotype.decision_list[decision_list_index]
        

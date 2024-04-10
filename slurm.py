@@ -22,7 +22,7 @@ def build_slurm_cmd(start_cmd, args):
     if args.random_nr: start_cmd = start_cmd + ' --random_nr'
     if args.hybrid: start_cmd = start_cmd + ' --hybrid'
     if args.ignore_matching: start_cmd = start_cmd + ' --ignore_matching'
-
+    assert args.test_time != None, "Test Time not specified, include an integer per test (RECOMMENDED - Hybrid = 15-20 seconds, All Others = 8-10 seconds)"
     run_seconds = args.num_test * args.test_time # approximately X seconds per a given test
     run_time = calc_slurm_time(run_seconds)
 
@@ -75,7 +75,7 @@ def main():
     arg_parser.add_argument("--output_frequency", "--of", type=int, default=10, help="(int) (DEFAULT = 10) Determines the organisms output to the detail-*.csv, where * is the generation number")
     arg_parser.add_argument("--ignore_matching", "--ms", action='store_true', default=False, help="(bool) (DEFAULT = False) If the experiment will match seeds to the runs")
     arg_parser.add_argument("--username", "--un", type=str, default=None, help='(str) Set to your username to determine email you when test starts and finishes')
-    arg_parser.add_argument("--test_time", "--tt", type=int, default=10, help="(int) (DEFAULT=10) Set number of seconds given for each test SLURM will allow")
+    arg_parser.add_argument("--test_time", "--tt", type=int, default=None, help="(int) (DEFAULT=None) Set number of seconds given for each test SLURM will allow -- I try to balance between efficiency and safety. Hybrid tests take about 20 seconds, the other tests take about 10 seconds. Since we don't require GPUs any amount of time should work.")
     arg_parser.add_argument("--run", "--r", action='store_true', default=False, help="(bool) (DEFAULT=False) Set to automatically submit SLURM job")
     args = arg_parser.parse_args()  
     
