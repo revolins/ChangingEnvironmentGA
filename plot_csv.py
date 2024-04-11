@@ -170,9 +170,10 @@ def main():
     arg_parser.add_argument("--output_frequency", type=int, default=10)
     arg_parser.add_argument("--number_of_generations", type=int, default=500)
     args = arg_parser.parse_args()
-
-    for csv in ['all_bits_df_Memory_comp_more_values.csv', 'all_bits_df_Summary_comp_more_values.csv', \
-                'all_bits_df_MemoryNSummary_comp_more_values.csv']:
+    if 'hybrid' in args.output_folder: csv_list = ['all_bits_df_Memory_comp_more_values.csv', 'all_bits_df_Summary_comp_more_values.csv', \
+                'all_bits_df_MemoryNSummary_comp_more_values.csv']
+    else: csv_list = ['all_bits_df_Memory_comp_more_values.csv']
+    for csv in csv_list:
         average_mem(args, csv)
     strat_freq(args)
     common_strats(args.output_folder)

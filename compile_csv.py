@@ -276,7 +276,7 @@ def main():
 
     for csv in ['bits_of_Memory_overtime.csv', 'bits_of_Summary_overtime.csv']:
       build_experiment_csv(args.output_folder, csv)
-    combine_sum_mem_csv(args.output_folder)
+    if 'hybrid' in args.output_folder: combine_sum_mem_csv(args.output_folder)
     build_strat_csv(args.output_folder)
     
 
