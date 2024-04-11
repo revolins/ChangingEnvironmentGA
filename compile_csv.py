@@ -44,21 +44,20 @@ def combine_sum_mem_csv(output_folder):
   new_headers = ['Index','Organisms with 0 Bits Average', 'Organisms with 1 Bits Average', \
                    'Organisms with 2 Bits Average', 'Organisms with 3 Bits Average', \
                     'Organisms with 4 Bits Average', 'MemCondition', 'OrgGeneration'] 
-  total_df = pandas.DataFrame(columns=new_headers) 
+  #total_df = pandas.DataFrame(columns=new_headers) 
   mem_col_dict = {name:new_headers[i] for i, name in enumerate(list(mem_df.columns))}
   sum_col_dict = {name:new_headers[i] for i, name in enumerate(list(sum_df.columns))}
-  print(mem_col_dict)
-  print("$$$$$$$$$$$$$$$$$$$$$$$$$$$")
-  print(total_df)
 
-  temp_sum_df = sum_df.rename(columns=mem_col_dict)
-  temp_mem_df = mem_df.rename(columns=sum_col_dict)
+  sum_df.rename(columns=sum_col_dict, inplace=True)
+  mem_df.rename(columns=mem_col_dict, inplace=True)
   
   if mem_df.shape == sum_df.shape:
-    total_df = pandas.concat([temp_mem_df, temp_sum_df]).groupby(total_df.columns.tolist()).mean() 
+    #total_df = pandas.concat([temp_mem_df, temp_sum_df]).groupby(total_df.columns.tolist()).mean() 
+    total_df = (sum_df + mem_df) / 2
+    del total_df['Index']
   else:
     raise Exception(f"Memory - {mem_df.shape} and Summary - {sum_df.shape} DataFrame mismatch shape")
-  total_df.to_csv(join_path(output_folder, f'all_bits_df_avg_comp_more_values.csv'), header=True)
+  total_df.to_csv(join_path(output_folder, f'all_bits_df_MemoryNSummary_comp_more_values.csv'), header=True)
 
 def make_strategy_dictionary(fileregx):
   def atoi(text):

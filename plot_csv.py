@@ -144,8 +144,10 @@ def common_strats(output_folder):
     dat = subset_data.pivot_table(index='Common_Strategy', columns=' Condition', aggfunc='size', fill_value=0)
     dat_melt = dat.reset_index().melt(id_vars='Common_Strategy', var_name=' Condition', value_name='Frequency')
 
-    order = ["0~~", "00~1~", "01~1~", "0001~11~"]
-    dat_melt['Common_Strategy'] = pd.Categorical(dat_melt['Common_Strategy']) #, categories=order, ordered=True
+    order = dat_melt['Common_Strategy'].value_counts().nlargest(4).index.tolist()
+    dat_melt = dat_melt[dat_melt['Common_Strategy'].isin(order)]
+    dat_melt['Common_Strategy'] = pd.Categorical(dat_melt['Common_Strategy'], categories=order, ordered=True)
+    dat_melt.sort_values(by='Common_Strategy', inplace=True)
 
     plt.figure(figsize=(12, 8))
     sns.barplot(x='Common_Strategy', y='Frequency', data=dat_melt) #, hue=' Condition' , dodge=True , palette=["#8CF582", "#82F5EB", "#828BF5", "#82B5EF"]
@@ -153,7 +155,6 @@ def common_strats(output_folder):
     plt.xticks(rotation=10)
     plt.xlabel('Strategy')
     plt.ylabel('Frequency')
-    #plt.legend().set_visible(True)
     plt.grid(axis='y')
 
     for container in plt.gca().containers:
@@ -171,7 +172,7 @@ def main():
     args = arg_parser.parse_args()
 
     for csv in ['all_bits_df_Memory_comp_more_values.csv', 'all_bits_df_Summary_comp_more_values.csv', \
-                'all_bits_df_avg_comp_more_values.csv']:
+                'all_bits_df_MemoryNSummary_comp_more_values.csv']:
         average_mem(args, csv)
     strat_freq(args)
     common_strats(args.output_folder)
