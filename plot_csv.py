@@ -15,9 +15,10 @@ warnings.simplefilter(action='ignore', category=FutureWarning) #For those pesky 
 def join_path(output_folder, filename):
         return os.path.join(output_folder, filename)
 
-def average_mem(args):
-    print("Constructing Memory Plots and Running Statistical Tests")
-    bits_of_memory_df = pd.read_csv(join_path(args.output_folder, "all_bits_df_static_comp_more_values.csv"))
+def average_mem(args, csv):
+    csv_type = csv.split('_')
+    print(f"Constructing {csv_type[3].upper()} Plots and Running Statistical Tests")
+    bits_of_memory_df = pd.read_csv(join_path(args.output_folder, f"all_bits_df_{csv_type[3]}_comp_more_values.csv"))
     bits_of_memory_df.replace([np.inf, -np.inf], np.nan, inplace=True)
     #print(bits_of_memory_df.columns.tolist())
     bits_of_memory_df.columns = ['Row_Label', 'B0', 'B1', 'B2', 'B3', 'B4', 'Condition', 'Generation']
@@ -47,73 +48,75 @@ def average_mem(args):
         color = palette[i]
         
         ax.fill_between(x=df_condition['Generation'],
-                        y1=df_condition['group_mean'] - (df_condition['group_sd'] / 5 ),
-                        y2=df_condition['group_mean'] + (df_condition['group_sd'] / 5 ),
+                        y1=df_condition['group_mean'] - (df_condition['group_sd'] ** 1/5),
+                        y2=df_condition['group_mean'] + (df_condition['group_sd'] ** 1/5),
                         color=color, alpha=0.3)
-    plt.title('Average Bits of Memory Over Time')
-    plt.ylabel('Average Bits of Memory')
+    plt.title(f'Average Bits of {csv_type[3]} Over Time')
+    plt.ylabel(f'Average Bits of {csv_type[3]}')
     plt.grid(False)
-    plt.savefig(join_path(args.output_folder, 'Average_Memory.png'))
+    plt.savefig(join_path(args.output_folder, f'Average_{csv_type[3]}.png'))
 
     palette = sns.color_palette("husl", len(conditions))
     plt.figure(figsize=(10, 6))
     sns.lineplot(data=summary_df, x='Generation', y='group_mean', hue='Condition', style='Condition', markers=False, dashes=False, palette=palette)
-    plt.title('Average Bits of Memory Over Time')
-    plt.ylabel('Average Bits of Memory')
+    plt.title(f'Average Bits of {csv_type[3]} Over Time')
+    plt.ylabel(f'Average Bits of {csv_type[3]}')
     plt.grid(False)
-    plt.savefig(join_path(args.output_folder, 'Average_Memory_NoDashes.png'))
+    plt.savefig(join_path(args.output_folder, f'Average_{csv_type[3]}_NoDashes.png'))
 
     plt.figure(figsize=(10, 6))
     plt.hist(bits_of_memory_df['Mean'], bins=30)
-    plt.title('Distribution of Mean Bits of Memory')
-    plt.xlabel('Mean Bits of Memory')
+    plt.title(f'Distribution of Mean Bits of {csv_type[3]}')
+    plt.xlabel(f'Mean Bits of {csv_type[3]}')
     plt.ylabel('Frequency')
-    plt.savefig(join_path(args.output_folder, 'Mean_Memory.png'))
+    plt.savefig(join_path(args.output_folder, f'Mean_{csv_type[3]}.png'))
 
-    with open(join_path(args.output_folder, "stat_output.txt"), "w") as f:
+    with open(join_path(args.output_folder, "stat_output.txt"), "a") as f:
         try:
             anova_results = stats.f_oneway(*[group['Mean'].values for name, group in bits_of_memory_df.groupby('Condition', observed=True)])
-            f.writelines(f'ANOVA test results: {anova_results}')
+            f.writelines(f'{csv_type[3].upper()} - ANOVA test results: {anova_results}')
             f.write('\n')
         except:
-            f.write("ANOVA test failed, likely needs more tests")
+            f.write(f"{csv_type[3].upper()} - ANOVA test failed, likely needs more conditions or test runs")
             f.write('\n')
-            print("ANOVA test failed, likely needs more tests", flush=True)
+            print(f"{csv_type[3].upper()} - ANOVA test failed, likely needs more tests", flush=True)
 
         try:
             tukey_results = pairwise_tukeyhsd(bits_of_memory_df['Mean'], bits_of_memory_df['Condition'])
-            f.writelines(f'Tukey test results: {tukey_results}')
+            f.writelines(f'{csv_type[3].upper()} - Tukey test results: {tukey_results}')
             f.write('\n')
         except:
-            f.write("Tukey test failed, likely needs more tests")
+            f.write(f"{csv_type[3].upper()} - Tukey test failed, likely needs more conditions or test runs")
             f.write('\n')
-            print("Tukey test failed, likely needs more tests", flush=True)
+            print(f"{csv_type[3].upper()} - Tukey test failed, likely needs more conditions or test runs", flush=True)
 
         try:
             kruskal_data = bits_of_memory_df[bits_of_memory_df['Generation'] == int(args.number_of_generations) - 1]
             kruskal_results = stats.kruskal(*[group['Mean'].values for name, group in kruskal_data.groupby('Condition', observed=True)])
-            f.writelines(f'Kruskal-Wallis test results: {kruskal_results}')
+            f.writelines(f"{csv_type[3].upper()} - Kruskal-Wallis test results: {kruskal_results}")
             f.write('\n')
         except:
-            f.write("Kruskal-Wallis Test Failed, results likely identical - can be fixed with more tests")
+            f.write(f"{csv_type[3].upper()} - Kruskal-Wallis Test Failed, results likely identical - can be fixed with more tests")
             f.write('\n')
-            print("Kruskal-Wallis Test Failed, results likely identical - can be fixed with more tests", flush=True)
+            print(f"{csv_type[3].upper()} - Kruskal-Wallis Test Failed, results likely identical - can be fixed with more tests", flush=True)
 
         try:
             comparison = MultiComparison(kruskal_data['Mean'], kruskal_data['Condition'])
             wilcox_results = comparison.allpairtest(stats.mannwhitneyu, method='bonferroni')
-            f.writelines(f'Bonferroni-Corrected Kruskal/Wilcox Test Results: {wilcox_results[0]}')
+            f.writelines(f"{csv_type[3].upper()} - Bonferroni-Corrected Kruskal/Wilcox Test Results: {wilcox_results[0]}")
             f.write('\n')
         except:
-            f.write("Wilcox Test Failed, results likely identical - can be fixed with more tests")
+            f.write(f"{csv_type[3].upper()} - Wilcox Test Failed, results likely identical - can be fixed with more tests")
             f.write('\n')
-            print("Wilcox Test Failed, results likely identical - can be fixed with more tests", flush=True)
+            print(f"{csv_type[3].upper()} - Wilcox Test Failed, results likely identical - can be fixed with more tests", flush=True)
     f.close()
 
 def strat_freq(args):
     print("Constructing Strategy Frequency Plot")
     strategies_df = pd.read_csv(join_path(str(args.output_folder), "strategies_df.csv"), header=None)
-    column_names = ['Row_Label'] + list(range(0, int(args.number_of_generations) + 1, int(args.output_frequency))) + ['Condition', 'Strategy']
+    if 'hybrid' in args.output_folder: temp_frequency = args.output_frequency / 2
+    else: temp_frequency = args.output_frequency
+    column_names = ['Row_Label'] + list(range(0, int(args.number_of_generations) + 1, int(temp_frequency))) + ['Condition', 'Strategy']
     strategies_df.columns = column_names
 
     strategies_df.drop('Row_Label', axis=1, inplace=True)
@@ -167,7 +170,9 @@ def main():
     arg_parser.add_argument("--number_of_generations", type=int, default=500)
     args = arg_parser.parse_args()
 
-    average_mem(args)
+    for csv in ['all_bits_df_Memory_comp_more_values.csv', 'all_bits_df_Summary_comp_more_values.csv', \
+                'all_bits_df_avg_comp_more_values.csv']:
+        average_mem(args, csv)
     strat_freq(args)
     common_strats(args.output_folder)
     

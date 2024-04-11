@@ -61,7 +61,8 @@ def run_test(args):
     temp_str = build_plt_cmd(args)
 
     mem_cost = ['0.0', '0.01', '0.05', '0.075', '0.2']
-    print("Initiating Seeded Run")
+    if args.ignore_matching: print("Initiating Unseeded Run")
+    else: print("Initiating Seeded Run")
     for i in tqdm(range(1, args.num_test + 1)):
         for cost in mem_cost:
             default_cmd = ["python", "changing_environment_ga.py", "--m_c", cost, "-o", f"{output_folder}/pd_{test_type}test{i}_{cost}_cost"]
