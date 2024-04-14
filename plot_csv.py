@@ -114,10 +114,12 @@ def average_mem(args, csv):
 def strat_freq(args):
     print("Constructing Strategy Frequency Plot")
     strategies_df = pd.read_csv(join_path(str(args.output_folder), "strategies_df.csv"), header=None)
-    if 'hybrid' in args.output_folder: temp_frequency = args.output_frequency / 2
-    else: temp_frequency = args.output_frequency
-    column_names = ['Row_Label'] + list(range(0, int(args.number_of_generations) + 1, int(temp_frequency))) + ['Condition', 'Strategy']
-    strategies_df.columns = column_names
+    try:
+        column_names = ['Row_Label'] + list(range(0, int(args.number_of_generations) + 1, int(args.output_frequency))) + ['Condition', 'Strategy']
+        strategies_df.columns = column_names
+    except:
+        column_names = ['Row_Label'] + list(range(0, int(args.number_of_generations) + 1, int(args.output_frequency / 2))) + ['Condition', 'Strategy'] 
+        strategies_df.columns = column_names
 
     strategies_df.drop('Row_Label', axis=1, inplace=True)
     strategies_df = pd.melt(strategies_df, id_vars=['Condition', 'Strategy'], var_name='Generation', value_name='Frequency')

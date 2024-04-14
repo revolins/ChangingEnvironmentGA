@@ -41,9 +41,9 @@ def combine_sum_mem_csv(output_folder):
   
   mem_df = pandas.read_csv(join_path(output_folder, 'all_bits_df_Memory_comp_more_values.csv'))
   sum_df = pandas.read_csv(join_path(output_folder, 'all_bits_df_Summary_comp_more_values.csv'))
-  new_headers = ['Index','Organisms with 0 Bits Average', 'Organisms with 1 Bits Average', \
-                   'Organisms with 2 Bits Average', 'Organisms with 3 Bits Average', \
-                    'Organisms with 4 Bits Average', 'MemCondition', 'OrgGeneration'] 
+  new_headers = ['Index','Organisms with 0 Bits Total', 'Organisms with 1 Bits Total', \
+                   'Organisms with 2 Bits Total', 'Organisms with 3 Bits Total', \
+                    'Organisms with 4 Bits Total', 'Condition', 'Generation'] 
   #total_df = pandas.DataFrame(columns=new_headers) 
   mem_col_dict = {name:new_headers[i] for i, name in enumerate(list(mem_df.columns))}
   sum_col_dict = {name:new_headers[i] for i, name in enumerate(list(sum_df.columns))}
