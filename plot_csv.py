@@ -163,7 +163,7 @@ def common_strats(output_folder):
 
 def main():
     arg_parser = argparse.ArgumentParser(
-        description='Plotting function for compiled csvs.')
+        description='Plotting function for handling DataFrames.')
     
     # Expects 1 argument: output folder
     arg_parser.add_argument("-o", "--output_folder", type=str, default="tests/pd_temp")

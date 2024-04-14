@@ -28,8 +28,8 @@ def make_file_detail(organisms, past_organisms, current_generation, filepath):
     # Create csv writer
     filename = filepath + '/detail-' + str(current_generation) + '.csv'
     if organisms[-1].genotype.type() == 'hybrid':
-        header = ['MemBits' , 'SumBits' , 'Decisions' , 'Memory' , 'Summary' , 'Alive' , 'Id' , 'ParentId']
-    else: header = ['Bits' , 'Decisions' , 'Memory' , 'Alive' , 'Id' , 'ParentId']
+        header = ['MemBits' , 'SumBits' , 'Decisions' , 'Memory' , 'Summary' , 'Alive' , 'Id' , 'ParentId', 'DecLength']
+    else: header = ['Bits' , 'Decisions' , 'Memory' , 'Alive' , 'Id' , 'ParentId', 'DecLength']
 
     # Put data where we want it
     data = []
@@ -57,6 +57,7 @@ def make_file_detail(organisms, past_organisms, current_generation, filepath):
         
         row.append([org.id for org in past_organisms[key]])
         row.append([org.parent for org in past_organisms[key]])
+        row.append([len(key.genotype.decision_list)])
         data.append(row)
 
     # Creates csv file

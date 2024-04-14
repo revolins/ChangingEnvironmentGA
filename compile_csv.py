@@ -53,7 +53,7 @@ def combine_sum_mem_csv(output_folder):
   
   if mem_df.shape == sum_df.shape:
     #total_df = pandas.concat([temp_mem_df, temp_sum_df]).groupby(total_df.columns.tolist()).mean() 
-    total_df = (sum_df + mem_df) / 2
+    total_df = sum_df + mem_df
     del total_df['Index']
   else:
     raise Exception(f"Memory - {mem_df.shape} and Summary - {sum_df.shape} DataFrame mismatch shape")
@@ -268,7 +268,7 @@ def build_strat_csv(output_folder):
 
 def main():
     arg_parser = argparse.ArgumentParser(
-        description='Plotting function for compiled csvs.')
+        description='Function to convert csvs into DataFrames for plotting.')
     
     # Expects 1 argument: output folder
     arg_parser.add_argument("-o", "--output_folder", type=str, default="tests/pd_temp")

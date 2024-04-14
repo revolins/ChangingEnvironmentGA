@@ -31,7 +31,7 @@ def parse_everything(command_line_args=None):
     arg_parser.add_argument("--mutation_rate", "--mr",  type=str, default="0.00")
     arg_parser.add_argument("--output_frequency", type=str, default="10")
     arg_parser.add_argument("--selection_by_static_competitor", "--static", action="store_true", default=False)
-    arg_parser.add_argument("--randomized_rounds", action="store_true", default=False)
+    arg_parser.add_argument("--randomized_rounds", action="store_true", default=True)
     arg_parser.add_argument("--noise", type=str, default="0.0")
     
     args = arg_parser.parse_args(args=command_line_args)    

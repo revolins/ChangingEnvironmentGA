@@ -15,8 +15,6 @@ def det_output(args):
 
     if args.noise > 0.0:
         folder_str = folder_str + "noise" + str(args.noise)
-    if args.random_nr:
-        folder_str = folder_str + "randomrnds"
     
     if args.mut_rat > 0.09:
         folder_str = folder_str + "highmut_"
@@ -39,8 +37,6 @@ def format_cmd(args):
         temp_cmd.extend(["--mr", str(args.mut_rat)])
     if args.noise > 0.0:
         temp_cmd.extend(["--noise", str(args.noise)])
-    if args.random_nr:
-        temp_cmd.extend(["--randomized_rounds"])
     if args.hybrid:
         temp_cmd.extend(["--org_type", "hybrid_pd"])
 
@@ -87,7 +83,6 @@ def main():
     arg_parser.add_argument("--static", "--s", action='store_true', default=False, help="(bool) (DEFAULT=False) Specify whether to test in static environment with no mutation rate")
     arg_parser.add_argument("--mut_rat", "--mr", type=float, default=0.0, help="(float) (DEFAULT=0.0) Set the rate at which the system will mutate memory and decision list")
     arg_parser.add_argument("--noise", "--n", type=float, default=0.0, help="(float) (DEFAULT = 0.0) Percent Likelihood the one of the opposing organisms moves is misread")
-    arg_parser.add_argument("--random_nr", "--rnr", action='store_true', default=False, help="(bool) (DEFAULT=False) Specify if number of tournament rounds are randomized in a single game")
     arg_parser.add_argument("--hybrid", "--h", action='store_true', default=False, help="(bool) (DEFAULT = False) original memory model (FALSE), hybrid memory model (TRUE)")
     arg_parser.add_argument("--number_of_generations", "--ng", type=int, default=500, help="(int) (DEFAULT = 500) number of generations selected upon after a tournament")
     arg_parser.add_argument("--output_frequency", "--of", type=int, default=10, help="(int) (DEFAULT = 10) Determines the organisms output to the detail-*.csv, where * is the generation number")
