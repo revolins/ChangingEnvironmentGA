@@ -339,7 +339,7 @@ def _create_random_genotype():
     # one of the lists may or may not exist
     # This implies that organisms have the option to use specific, summary memory, or both
     total_bits_of_memory = random.randrange(MAX_BITS_OF_MEMORY + 1)
-    number_of_bits_of_memory = random.randrange(total_bits_of_memory)
+    number_of_bits_of_memory = random.randrange(total_bits_of_memory + 1)
     number_of_bits_of_summary = total_bits_of_memory - number_of_bits_of_memory
     assert number_of_bits_of_memory + number_of_bits_of_summary <= MAX_BITS_OF_MEMORY
     length = 2 ** number_of_bits_of_memory * (number_of_bits_of_summary + 1)
