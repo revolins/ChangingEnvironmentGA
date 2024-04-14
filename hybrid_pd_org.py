@@ -15,11 +15,10 @@ MUTATION_LIKELIHOOD_OF_INITIAL_MEMORY_STATE = None
 class HybridPDGenotype(object):
     """
     Hybrid Memory Model Genotype for inheriting in the HybridPDOrg Class
-    temp file location for implementation
     """
 
     def __init__(self, number_of_bits_of_memory, number_of_bits_of_summary, decision_list, initial_memory, initial_summary):
-        assert 0 <= number_of_bits_of_memory <= MAX_BITS_OF_MEMORY
+        assert 0 <= number_of_bits_of_memory + number_of_bits_of_summary <= MAX_BITS_OF_MEMORY
         assert len(decision_list) == 2 ** number_of_bits_of_memory * (number_of_bits_of_summary + 1)
         assert len(initial_memory) == number_of_bits_of_memory
         assert len(initial_summary) == number_of_bits_of_summary
@@ -91,22 +90,26 @@ class HybridPDGenotype(object):
         """
         should_increase_memory = random.choice([True, False])
 
-        # If organism has no specific and summed memory, don't decrease anything
-        if (self.number_of_bits_of_memory == 0 and self.number_of_bits_of_summary == 0) and not should_increase_memory:
+        # If organism has no memory, don't decrease anything
+        if (self.number_of_bits_of_memory + self.number_of_bits_of_summary == 0) and not should_increase_memory:
             return self
         
-        # If organism has maximum specific and summed memory, don't increase anything
-        if (self.number_of_bits_of_memory == MAX_BITS_OF_MEMORY and self.number_of_bits_of_summary == MAX_BITS_OF_SUMMARY) and should_increase_memory:
+        # If organism has maximum memory, don't increase anything
+        if (self.number_of_bits_of_memory + self.number_of_bits_of_summary == MAX_BITS_OF_MEMORY) and should_increase_memory:
             return self
         
+        # Changing both is risky under a single max memory threshold
+        # If True, update SUMMARY memory
+        # If False, update SPECIFIC memory
+        summary_or_memory = random.choice([True, False]) 
+
         # If we increase memory length
         if should_increase_memory:
-
             # Specific memory (k)
             new_number_of_bits_of_memory = self.number_of_bits_of_memory
             new_initial_memory = self.initial_memory[:]
-            # Increase specific memory if less than max
-            if self.number_of_bits_of_memory < MAX_BITS_OF_MEMORY:
+            # Increase specific memory
+            if not summary_or_memory:
                 # Update length
                 new_number_of_bits_of_memory = self.number_of_bits_of_memory + 1 
                 # Add 1 extra bit to initial memory
@@ -115,8 +118,8 @@ class HybridPDGenotype(object):
             # Summed memory (j)
             new_number_of_bits_of_summary = self.number_of_bits_of_summary
             new_initial_summary = self.initial_summary[:]
-            # Increase summed memory if less than max 
-            if self.number_of_bits_of_summary < MAX_BITS_OF_SUMMARY:
+            # Increase summed memory
+            if summary_or_memory:
                 # Update length
                 new_number_of_bits_of_summary = self.number_of_bits_of_summary + 1  
                 # Add 1 extra bit to summary memory
@@ -144,8 +147,8 @@ class HybridPDGenotype(object):
         # Specific memory (k)
         new_number_of_bits_of_memory = self.number_of_bits_of_memory
         new_initial_memory = self.initial_memory[:]
-        # Decrease specific memory if larger than 0
-        if self.number_of_bits_of_memory > 0:
+        # Decrease specific memory
+        if not summary_or_memory:
             new_number_of_bits_of_memory = self.number_of_bits_of_memory - 1 
             # Remove most distant memory bit
             new_initial_memory = self.initial_memory[:-1]
@@ -153,8 +156,8 @@ class HybridPDGenotype(object):
         # Summed memory (j)
         new_number_of_bits_of_summary = self.number_of_bits_of_summary
         new_initial_summary = self.initial_summary[:]
-        # Decrease summed memory if larger than 0
-        if self.number_of_bits_of_summary > 0:
+        # Decrease summed memory
+        if summary_or_memory:
             new_number_of_bits_of_summary = self.number_of_bits_of_summary - 1
             # Remove most distant memory bit
             new_initial_summary = self.initial_summary[:-1]
@@ -228,7 +231,6 @@ class HybridPDOrg(object):
         self.genotype = genotype
         self.memory = None
         self.initialize_memory()
-        # print(self.memory)
         self.id = HybridPDOrg.next_org_id
         HybridPDOrg.next_org_id += 1
         self.parent = parent
@@ -265,7 +267,7 @@ class HybridPDOrg(object):
         """
         # No specific or summary memory
         if not self.memory:
-            decision_list_index = 0
+            decision_list_index = 0 # organism will have a decision list of size 1
 
         # At least specific or summary memory
         else:
@@ -289,7 +291,7 @@ class HybridPDOrg(object):
 
                 # Which "block" does binary_index belong to?
                 # If summary memory doesn't exist, works like PDOrg
-                decision_list_index = binary_index + 2 ** len_memory * summary_index
+                decision_list_index = binary_index + (2 ** len_memory) * summary_index
 
             # If specified memory doesn't exist, summary memory has to at least exist
             else:
@@ -298,7 +300,7 @@ class HybridPDOrg(object):
                 # In this case, decision list has size (j+1)
                 decision_list_index = sum(1 for i in self.memory if i==True)
 
-                assert decision_list_index <= (self.genotype.number_of_bits_of_summary + 1)
+                assert decision_list_index <= (self.genotype.number_of_bits_of_summary)
 
 
         # print("************************** NEW ORGANISM GENOTYPE ********************************", flush=True)
@@ -311,11 +313,12 @@ class HybridPDOrg(object):
        
     def store_bit_of_memory(self, did_cooperate):
         """
-        Stores opponent's last move in memory at the right end of memory and
-        deletes oldest move (on left)
+        Stores opponent's last move in memory at the left end of memory and
+        deletes oldest move (on right)
         """
-        self.memory.append(did_cooperate)
-        self.memory.popleft()   
+        # Newest goes to the front of the list
+        self.memory.appendleft(did_cooperate) 
+        self.memory.pop()   
         
     def initialize_memory(self):
         """Get double-ended queue memory"""
@@ -331,10 +334,14 @@ def _create_random_genotype():
     
     Used by HybridPDOrg as default returned genotype
     """
-    # randrange generate number in range [0, MAX_BITS_OF_MEMORY]
+    # randrange generate number in range [0, MAX_BITS_OF_MEMORY] = total bits of mem
+    # get random index to make a random split
+    # one of the lists may or may not exist
     # This implies that organisms have the option to use specific, summary memory, or both
-    number_of_bits_of_memory = random.randrange(MAX_BITS_OF_MEMORY + 1)
-    number_of_bits_of_summary = random.randrange(MAX_BITS_OF_SUMMARY + 1)
+    total_bits_of_memory = random.randrange(MAX_BITS_OF_MEMORY + 1)
+    number_of_bits_of_memory = random.randrange(total_bits_of_memory)
+    number_of_bits_of_summary = total_bits_of_memory - number_of_bits_of_memory
+    assert number_of_bits_of_memory + number_of_bits_of_summary <= MAX_BITS_OF_MEMORY
     length = 2 ** number_of_bits_of_memory * (number_of_bits_of_summary + 1)
     decision_list = [random.choice([True, False]) for _ in range(length)]
     initial_memory = [random.choice([True, False]) for _ in range(number_of_bits_of_memory)]
