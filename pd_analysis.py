@@ -24,13 +24,13 @@ def get_tally_of_number_of_bits_of_memory(organisms):
 
 def get_tally_of_number_of_bits_summary(organisms):
     """
-    Returns a list of length MAX_BITS_OF_MEMORY + 1, MAX_BITS_OF_SUMMARY + 1 where each
+    Returns a list of length MAX_BITS_OF_MEMORY + 1 where each
     position represents the number of organisms with that many number of bits of summary
     """
 
     bits_of_summary = [org.genotype.number_of_bits_of_summary for org in organisms]
 
-    tally = [0 for _ in range(hybrid_pd_org.MAX_BITS_OF_SUMMARY + 1)]
+    tally = [0 for _ in range(hybrid_pd_org.MAX_BITS_OF_MEMORY + 1)]
 
     for bits in bits_of_summary:
         tally[bits] += 1

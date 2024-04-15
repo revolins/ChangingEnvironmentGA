@@ -37,13 +37,29 @@ def build_experiment_csv(output_folder, csv):
   
   all_bits_df.to_csv(join_path(output_folder, f'all_bits_df_{csv_type[2]}_comp_more_values.csv'), header=True)
 
+def dec_list_len_csv(output_folder, csv):
+  list_of_bits = glob.glob(join_path(output_folder, f'*/{csv}'))
+  all_bits_df = pandas.DataFrame()
+
+  print(f"Compiling Decision List Length Results")
+  for individual_file in tqdm(list_of_bits):
+      Condition = individual_file.split("/")[-1]
+      Condition = Condition.split("_")[4]
+      
+      individual_file_df = pandas.read_csv(individual_file)
+      individual_file_df['Condition'] = [Condition] * individual_file_df.shape[0]
+      individual_file_df['Generation'] = range(individual_file_df.shape[0])
+      all_bits_df = all_bits_df._append(individual_file_df)
+  
+  all_bits_df.to_csv(join_path(output_folder, f'decision_list_length_overtime.csv'), header=True)
+
 def combine_sum_mem_csv(output_folder):
   
   mem_df = pandas.read_csv(join_path(output_folder, 'all_bits_df_Memory_comp_more_values.csv'))
   sum_df = pandas.read_csv(join_path(output_folder, 'all_bits_df_Summary_comp_more_values.csv'))
-  new_headers = ['Index','Organisms with 0 Bits Total', 'Organisms with 1 Bits Total', \
-                   'Organisms with 2 Bits Total', 'Organisms with 3 Bits Total', \
-                    'Organisms with 4 Bits Total', 'Condition', 'Generation'] 
+  tracking_df = mem_df.drop(mem_df.columns[[0, -2, -1]], axis=1)
+  new_headers = ['Index'] + [f'Organisms with {i} Bits Total' for i in range(len(list(tracking_df.columns)))] + ['Condition', 'Generation']
+
   #total_df = pandas.DataFrame(columns=new_headers) 
   mem_col_dict = {name:new_headers[i] for i, name in enumerate(list(mem_df.columns))}
   sum_col_dict = {name:new_headers[i] for i, name in enumerate(list(sum_df.columns))}
@@ -51,13 +67,15 @@ def combine_sum_mem_csv(output_folder):
   sum_df.rename(columns=sum_col_dict, inplace=True)
   mem_df.rename(columns=mem_col_dict, inplace=True)
   
-  if mem_df.shape == sum_df.shape:
-    #total_df = pandas.concat([temp_mem_df, temp_sum_df]).groupby(total_df.columns.tolist()).mean() 
-    total_df = sum_df + mem_df
+  if mem_df.shape == sum_df.shape: 
+    total_df = sum_df
+    total_df[1:-2] = sum_df[1:-2] + mem_df[1:-2]
+    total_df['Index'], total_df['Condition'], total_df['Generation'] = sum_df['Index'], sum_df['Condition'], sum_df['Generation']
     del total_df['Index']
   else:
     raise Exception(f"Memory - {mem_df.shape} and Summary - {sum_df.shape} DataFrame mismatch shape")
-  total_df.to_csv(join_path(output_folder, f'all_bits_df_MemoryNSummary_comp_more_values.csv'), header=True)
+  total_df.to_csv(join_path(output_folder, f'all_bits_df_Total_comp_more_values.csv'), header=True)
+        
 
 def make_strategy_dictionary(fileregx):
   def atoi(text):
@@ -277,6 +295,7 @@ def main():
     for csv in ['bits_of_Memory_overtime.csv', 'bits_of_Summary_overtime.csv']:
       build_experiment_csv(args.output_folder, csv)
     if 'hybrid' in args.output_folder: combine_sum_mem_csv(args.output_folder)
+    dec_list_len_csv(args.output_folder, 'decision_list_length_aggregate.csv')
     build_strat_csv(args.output_folder)
     
 

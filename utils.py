@@ -16,6 +16,7 @@ import pd_tournament
 import pd_org
 import hybrid_pd_org
 import pd_make_detail_file
+import compile_csv
 
 FITNESS_FUNCTION_TYPE = None
 NUMBER_OF_ORGANISMS = None
@@ -72,14 +73,18 @@ def pd_evolve_population():
     # Prepare header for output data
     mem_output = []
     sum_output = []
+    declen_output = []
     mem_headers = []
     sum_headers = []
+    dec_headers = []
     for i in range(pd_org.MAX_BITS_OF_MEMORY + 1):
         mem_headers.append("Organisms With " + str(i) + " Bits of Memory")
-    mem_output.append(mem_headers)
-    for i in range(hybrid_pd_org.MAX_BITS_OF_SUMMARY + 1):
         sum_headers.append("Organisms With " + str(i) + " Bits of Summary")
+    for i in range(NUMBER_OF_ORGANISMS):
+        dec_headers.append(f"Organism #{i}")
+    mem_output.append(mem_headers)
     sum_output.append(sum_headers)
+    declen_output.append(dec_headers)
 
     # Adding each organism's strategy as keys
     # Each key holds a list of occurrences for the same strategy
@@ -112,6 +117,7 @@ def pd_evolve_population():
         mem_output.append(pd_analysis.get_tally_of_number_of_bits_of_memory(organisms))
         if organisms[-1].genotype.type() == 'hybrid':
             sum_output.append(pd_analysis.get_tally_of_number_of_bits_summary(organisms))
+        declen_output.append([len(org.genotype.decision_list) for org in organisms])
 
         # Adding more into existing dictionary
         # TODO: Why does this work? Why does the dictionary length remain unchanged? 
@@ -128,7 +134,7 @@ def pd_evolve_population():
         if ( (i + 1) % OUTPUT_FREQUENCY == 0):
             pd_make_detail_file.make_file_detail(organisms, past_organisms, i + 1, OUTPUT_FOLDER)
 
-    return mem_output, sum_output
+    return mem_output, sum_output, declen_output
 
 def get_average_fitness(pop, environment):
     """Gets average fitness of a population"""
@@ -169,7 +175,6 @@ def set_global_variables(config):
         pd_org.MUTATION_LIKELIHOOD_OF_BITS_OF_MEMORY = config.getfloat("DEFAULT", "mutation_likelihood_of_bits_of_memory")
         pd_org.MUTATION_LIKELIHOOD_OF_INITIAL_MEMORY_STATE = config.getfloat("DEFAULT", "mutation_likelihood_of_initial_memory_state")
         hybrid_pd_org.MAX_BITS_OF_MEMORY = config.getint("DEFAULT", "max_bits_of_memory")
-        hybrid_pd_org.MAX_BITS_OF_SUMMARY = config.getint("DEFAULT", "max_bits_of_summary")
         hybrid_pd_org.MUTATION_LIKELIHOOD_OF_BITS_OF_MEMORY = config.getfloat("DEFAULT", "mutation_likelihood_of_bits_of_memory")
         hybrid_pd_org.MUTATION_LIKELIHOOD_OF_INITIAL_MEMORY_STATE = config.getfloat("DEFAULT", "mutation_likelihood_of_initial_memory_state")
         global SELECTION_BY_STATIC_COMPETITOR
@@ -208,12 +213,11 @@ def generate_data():
     os.makedirs(OUTPUT_FOLDER)
     
     if ORG_TYPE == "pd" or ORG_TYPE == "hybrid_pd":
-        mem_output, sum_output = pd_evolve_population()
-        output_filename = join_path("bits_of_memory_overtime.csv")
-        save_table_to_file(mem_output, output_filename)
+        mem_output, sum_output, declen_output = pd_evolve_population()
+        save_table_to_file(mem_output, join_path("bits_of_memory_overtime.csv"))
+        save_table_to_file(declen_output, join_path("decision_list_length_aggregate.csv"))
     if ORG_TYPE == "hybrid_pd":
-        output_filename = join_path("bits_of_summary_overtime.csv")
-        save_table_to_file(sum_output, output_filename)
+        save_table_to_file(sum_output, join_path("bits_of_summary_overtime.csv"))
         
     time_filename = join_path("time.dat")     
     start_time = datetime.datetime.fromtimestamp(START_TIME)

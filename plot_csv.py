@@ -15,22 +15,20 @@ warnings.simplefilter(action='ignore', category=FutureWarning) #For those pesky 
 def join_path(output_folder, filename):
         return os.path.join(output_folder, filename)
 
-def average_mem(args, csv):
-    csv_type = csv.split('_')
-    print(f"Constructing {csv_type[3].upper()} Plots and Running Statistical Tests")
-    bits_of_memory_df = pd.read_csv(join_path(args.output_folder, f"all_bits_df_{csv_type[3]}_comp_more_values.csv"))
+def average_dll(args):
+    print(f"Constructing Decision List Length Plots")
+    bits_of_memory_df = pd.read_csv(join_path(args.output_folder, f"decision_list_length_overtime.csv"))
     bits_of_memory_df.replace([np.inf, -np.inf], np.nan, inplace=True)
-    #print(bits_of_memory_df.columns.tolist())
-    bits_of_memory_df.columns = ['Row_Label', 'B0', 'B1', 'B2', 'B3', 'B4', 'Condition', 'Generation']
-    #print(bits_of_memory_df.columns.tolist())
-    bits_of_memory_df.drop(['Row_Label'], axis=1, inplace=True)
+    read_columns = bits_of_memory_df.columns[1:-2]
+    bits_of_memory_df.drop(bits_of_memory_df.columns[0], axis=1, inplace=True)
     bits_of_memory_df['Generation'] = pd.to_numeric(bits_of_memory_df['Generation'], errors='coerce')
     bits_of_memory_df['Condition'] = pd.Categorical(pd.to_numeric(bits_of_memory_df['Condition'], errors='coerce'))
-    for col in tqdm(['B0', 'B1', 'B2', 'B3', 'B4']):
+    for col in tqdm(read_columns):
         bits_of_memory_df[col] = pd.to_numeric(bits_of_memory_df[col], errors='coerce')
 
-    weights = np.arange(5)
-    bits_of_memory_df['Mean'] = bits_of_memory_df.apply(lambda row: np.average(row[:5], weights=weights), axis=1)
+    # weights = np.arange(1, len(read_columns) + 1)
+    # weights = weights / weights.sum()
+    bits_of_memory_df['Mean'] = bits_of_memory_df.apply(lambda row: np.average(row[:len(read_columns)]), axis=1)
 
     summary_df = bits_of_memory_df.groupby(['Condition', 'Generation'], observed=True).agg(
         group_mean=('Mean', 'mean'),
@@ -51,18 +49,73 @@ def average_mem(args, csv):
                         y1=df_condition['group_mean'] - (df_condition['group_sd'] ** 1/5),
                         y2=df_condition['group_mean'] + (df_condition['group_sd'] ** 1/5),
                         color=color, alpha=0.3)
-    plt.title(f'Average Bits of {csv_type[3]} Over Time')
-    plt.ylabel(f'Average Bits of {csv_type[3]}')
+    plt.title(f'Average Decision List Length Over Time')
+    plt.ylabel(f'Average Decision List Length')
     plt.grid(False)
-    plt.savefig(join_path(args.output_folder, f'Average_{csv_type[3]}.png'))
+    plt.savefig(join_path(args.output_folder, f'Average_Decision_List_Length.png'))
 
     palette = sns.color_palette("husl", len(conditions))
     plt.figure(figsize=(10, 6))
     sns.lineplot(data=summary_df, x='Generation', y='group_mean', hue='Condition', style='Condition', markers=False, dashes=False, palette=palette)
-    plt.title(f'Average Bits of {csv_type[3]} Over Time')
-    plt.ylabel(f'Average Bits of {csv_type[3]}')
+    plt.title(f'Average Decision List Length Over Time')
+    plt.ylabel(f'Average Decision List Length')
     plt.grid(False)
-    plt.savefig(join_path(args.output_folder, f'Average_{csv_type[3]}_NoDashes.png'))
+    plt.savefig(join_path(args.output_folder, f'Average_Decision_List_Length_NoDashes.png'))
+
+    plt.figure(figsize=(10, 6))
+    plt.hist(bits_of_memory_df['Mean'], bins=30)
+    plt.title(f'Distribution of Mean Decision List Length')
+    plt.xlabel(f'Mean Decision List Length')
+    plt.ylabel('Frequency')
+    plt.savefig(join_path(args.output_folder, f'Mean_Decision_List_Length.png'))
+
+def average_mem(args, csv):
+    csv_type = csv.split('_')
+    print(f"Constructing {csv_type[3].upper()} Plots and Running Statistical Tests")
+    bits_of_memory_df = pd.read_csv(join_path(args.output_folder, f"all_bits_df_{csv_type[3]}_comp_more_values.csv"))
+    bits_of_memory_df.replace([np.inf, -np.inf], np.nan, inplace=True)
+    read_columns = bits_of_memory_df.columns[1:-2]
+    bits_of_memory_df.drop(bits_of_memory_df.columns[0], axis=1, inplace=True)
+    bits_of_memory_df['Generation'] = pd.to_numeric(bits_of_memory_df['Generation'], errors='coerce')
+    bits_of_memory_df['Condition'] = pd.Categorical(pd.to_numeric(bits_of_memory_df['Condition'], errors='coerce'))
+    for col in tqdm(read_columns):
+        bits_of_memory_df[col] = pd.to_numeric(bits_of_memory_df[col], errors='coerce')
+
+    weights = np.arange(1, len(read_columns) + 1)
+    weights = weights / weights.sum()
+    bits_of_memory_df['Mean'] = bits_of_memory_df.apply(lambda row: np.average(row[:len(read_columns)], weights=weights), axis=1)
+
+    summary_df = bits_of_memory_df.groupby(['Condition', 'Generation'], observed=True).agg(
+        group_mean=('Mean', 'mean'),
+        group_sd=('Mean', 'std')
+    ).reset_index()
+
+    conditions = summary_df['Condition'].unique()
+
+    palette = sns.color_palette("husl", len(conditions))
+    plt.figure(figsize=(10, 6))
+    sns.lineplot(data=summary_df, x='Generation', y='group_mean', hue='Condition', style='Condition', markers=False, dashes=False, err_style="band", errorbar='ci', palette=palette)
+    ax = plt.gca()
+    for i, condition in enumerate(conditions):
+        df_condition = summary_df[summary_df['Condition'] == condition]
+        color = palette[i]
+        
+        ax.fill_between(x=df_condition['Generation'],
+                        y1=df_condition['group_mean'] - (df_condition['group_sd'] ** 1/5),
+                        y2=df_condition['group_mean'] + (df_condition['group_sd'] ** 1/5),
+                        color=color, alpha=0.3)
+    plt.title(f'Weighted Average Bits of {csv_type[3]} Over Time')
+    plt.ylabel(f'Weighted Average Bits of {csv_type[3]}')
+    plt.grid(False)
+    plt.savefig(join_path(args.output_folder, f'Weighted Average_{csv_type[3]}.png'))
+
+    palette = sns.color_palette("husl", len(conditions))
+    plt.figure(figsize=(10, 6))
+    sns.lineplot(data=summary_df, x='Generation', y='group_mean', hue='Condition', style='Condition', markers=False, dashes=False, palette=palette)
+    plt.title(f'Weighted Average Bits of {csv_type[3]} Over Time')
+    plt.ylabel(f'Weighted Average Bits of {csv_type[3]}')
+    plt.grid(False)
+    plt.savefig(join_path(args.output_folder, f'Weighted Average_{csv_type[3]}_NoDashes.png'))
 
     plt.figure(figsize=(10, 6))
     plt.hist(bits_of_memory_df['Mean'], bins=30)
@@ -173,10 +226,13 @@ def main():
     arg_parser.add_argument("--number_of_generations", type=int, default=500)
     args = arg_parser.parse_args()
     if 'hybrid' in args.output_folder: csv_list = ['all_bits_df_Memory_comp_more_values.csv', 'all_bits_df_Summary_comp_more_values.csv', \
-                'all_bits_df_MemoryNSummary_comp_more_values.csv']
+                'all_bits_df_Total_comp_more_values.csv']
     else: csv_list = ['all_bits_df_Memory_comp_more_values.csv']
+    if os.path.exists(join_path(args.output_folder, "stat_output.txt")):
+        os.remove(join_path(args.output_folder, "stat_output.txt"))
     for csv in csv_list:
         average_mem(args, csv)
+    average_dll(args)
     strat_freq(args)
     common_strats(args.output_folder)
     

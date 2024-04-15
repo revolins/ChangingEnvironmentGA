@@ -2,6 +2,7 @@ import subprocess
 from tqdm import tqdm
 import argparse
 import datetime
+import sys
 
 def det_output(args):
     folder_str = 'pd'
@@ -15,6 +16,8 @@ def det_output(args):
 
     if args.noise > 0.0:
         folder_str = folder_str + "noise" + str(args.noise)
+    if args.remove_mem_limit:
+        folder_str = folder_str + "maxmem"
     
     if args.mut_rat > 0.09:
         folder_str = folder_str + "highmut_"
@@ -39,6 +42,8 @@ def format_cmd(args):
         temp_cmd.extend(["--noise", str(args.noise)])
     if args.hybrid:
         temp_cmd.extend(["--org_type", "hybrid_pd"])
+    if args.remove_mem_limit:
+        temp_cmd.extend(["--max_bits_of_memory", str(16)])
 
     return temp_cmd
 
@@ -87,6 +92,7 @@ def main():
     arg_parser.add_argument("--number_of_generations", "--ng", type=int, default=500, help="(int) (DEFAULT = 500) number of generations selected upon after a tournament")
     arg_parser.add_argument("--output_frequency", "--of", type=int, default=10, help="(int) (DEFAULT = 10) Determines the organisms output to the detail-*.csv, where * is the generation number")
     arg_parser.add_argument("--ignore_matching", "--ms", action='store_true', default=False, help="(bool) (DEFAULT = False) If the experiment will match seeds to the runs")
+    arg_parser.add_argument("--remove_mem_limit", "--ml", action='store_true', default=False, help="(bool) (DEFAULT = False) If experiment will run without memory limit on number of bits of summary and memory")
     args = arg_parser.parse_args()  
     
     run_test(args)
