@@ -19,8 +19,13 @@ class HybridPDGenotype(object):
     def __init__(self, number_of_bits_of_memory, number_of_bits_of_summary, decision_list, initial_memory, initial_summary):
         assert 0 <= number_of_bits_of_memory + number_of_bits_of_summary <= MAX_BITS_OF_MEMORY
         assert len(decision_list) == (2 ** number_of_bits_of_memory) * (number_of_bits_of_summary + 1)
+        print("NEW ORG ALERT")
+        print("DECISION LIST LENGTH", len(decision_list))
+        print("DECISION LIST", decision_list)
         assert len(initial_memory) == number_of_bits_of_memory
+        print("MEMORY LEN", number_of_bits_of_memory)
         assert len(initial_summary) == number_of_bits_of_summary
+        print("SUMMARY LEN", number_of_bits_of_summary)
 
         self.number_of_bits_of_memory = number_of_bits_of_memory
         self.number_of_bits_of_summary = number_of_bits_of_summary
@@ -114,12 +119,6 @@ class HybridPDGenotype(object):
 
         # If we increase memory length
         if should_increase_memory:
-            print("====================INCREASE====================")
-            print("=====PREVIOUS=====")
-            print("PREVIOUS memory bits", self.number_of_bits_of_memory)
-            print("PREVIOUS summary bits", self.number_of_bits_of_summary)
-            print("PREV DECISION LIST LEN", len(self.decision_list))
-
             # Increase specific memory (k)
             if not summary_or_memory:
                 # Increment length of specific
@@ -138,25 +137,29 @@ class HybridPDGenotype(object):
                 # If summary memory is chosen, add 2^k random decisions
                 for i in range(2 ** new_number_of_bits_of_memory):
                     new_decision_list.append(random.choice([True, False]))
-
-            print("=====NEW=====")
-            print("NEW memory bits", new_number_of_bits_of_memory)
-            print("NEW summary bits", new_number_of_bits_of_summary)
-            print("NEW DECISION LIST LEN", len(new_decision_list))
-
+        
             # SANITY CHECK
             # Length of new decision list 2^k(j+1)
             length_of_new_decision_list = 2 ** new_number_of_bits_of_memory * (new_number_of_bits_of_summary + 1)
+
             assert len(new_decision_list) == length_of_new_decision_list, "DECISION LIST LENGTHS DON'T MATCH (INCREASING)"
-            
+            # is it because of mutation operator?
+            if len(new_decision_list) != (2 ** new_number_of_bits_of_memory) * (new_number_of_bits_of_summary + 1):
+                print("====================INCREASE====================")
+                print("=====PREVIOUS=====")
+                print("PREVIOUS memory bits", self.number_of_bits_of_memory)
+                print("PREVIOUS summary bits", self.number_of_bits_of_summary)
+                print("PREV DECISION LIST LEN", len(self.decision_list))
+                print("PREV decision list", self.decision_list)
+                print("=====NEW=====")
+                print("NEW memory bits", new_number_of_bits_of_memory)
+                print("NEW summary bits", new_number_of_bits_of_summary)
+                print("NEW DECISION LIST LEN", len(new_decision_list))
+                print("NEW decision list", new_decision_list)
+
             return HybridPDGenotype(new_number_of_bits_of_memory, new_number_of_bits_of_summary, new_decision_list, new_initial_memory, new_initial_summary)
 
         # If we decrease memory length
-        print("====================DECREASE====================")
-        print("=====PREVIOUS=====")
-        print("PREVIOUS memory bits", self.number_of_bits_of_memory)
-        print("PREVIOUS summary bits", self.number_of_bits_of_summary)
-        print("PREV DECISION LIST LEN", len(self.decision_list))
 
         # Decrease specific memory (k)
         if not summary_or_memory and new_number_of_bits_of_memory > 0:
@@ -175,16 +178,22 @@ class HybridPDGenotype(object):
 
         # Decrease decision list
         new_decision_list = self.decision_list[:length_of_new_decision_list]
-
-        print("=====NEW=====")
-        print("NEW memory bits", new_number_of_bits_of_memory)
-        print("NEW summary bits", new_number_of_bits_of_summary)
-        print("NEW DECISION LIST LEN", len(new_decision_list))
-        print("NEW decision list", new_decision_list)
-        print("supposed len of new dec list", length_of_new_decision_list)
         
         # SANITY CHECK
         assert len(new_decision_list) == length_of_new_decision_list, "DECISION LIST LENGTHS DON'T MATCH (DECREASING)"
+        # is it because of mutation operator?
+        if len(new_decision_list) != (2 ** new_number_of_bits_of_memory) * (new_number_of_bits_of_summary + 1):
+            print("====================INCREASE====================")
+            print("=====PREVIOUS=====")
+            print("PREVIOUS memory bits", self.number_of_bits_of_memory)
+            print("PREVIOUS summary bits", self.number_of_bits_of_summary)
+            print("PREV DECISION LIST LEN", len(self.decision_list))
+            print("PREV decision list", self.decision_list)
+            print("=====NEW=====")
+            print("NEW memory bits", new_number_of_bits_of_memory)
+            print("NEW summary bits", new_number_of_bits_of_summary)
+            print("NEW DECISION LIST LEN", len(new_decision_list))
+            print("NEW decision list", new_decision_list)
 
         return HybridPDGenotype(new_number_of_bits_of_memory, new_number_of_bits_of_summary, new_decision_list, new_initial_memory, new_initial_summary) 
         
@@ -353,8 +362,11 @@ def _create_random_genotype():
     total_bits_of_memory = random.randrange(MAX_BITS_OF_MEMORY + 1)
     number_of_bits_of_memory = random.randrange(total_bits_of_memory + 1)
     number_of_bits_of_summary = total_bits_of_memory - number_of_bits_of_memory
+
     assert number_of_bits_of_memory + number_of_bits_of_summary <= MAX_BITS_OF_MEMORY
-    length = 2 ** number_of_bits_of_memory * (number_of_bits_of_summary + 1)
+
+    length = (2 ** number_of_bits_of_memory) * (number_of_bits_of_summary + 1)
+
     decision_list = [random.choice([True, False]) for _ in range(length)]
     initial_memory = [random.choice([True, False]) for _ in range(number_of_bits_of_memory)]
     initial_summary = [random.choice([True, False]) for _ in range(number_of_bits_of_summary)]
