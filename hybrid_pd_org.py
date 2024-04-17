@@ -18,6 +18,10 @@ class HybridPDGenotype(object):
 
     def __init__(self, number_of_bits_of_memory, number_of_bits_of_summary, decision_list, initial_memory, initial_summary):
         assert 0 <= number_of_bits_of_memory + number_of_bits_of_summary <= MAX_BITS_OF_MEMORY
+        print("LENGTH OF DECISION LIST IN HYBRID PD ORG: ", len(decision_list))
+        print("DECISION LIST IN HYBRID PD ORG: ", decision_list)
+        print("CURRENT NUMBER OF BITS OF MEMORY IN HYBRID PD ORG: ", number_of_bits_of_memory)
+        print("CURRENT NUMBER OF BITS OF SUMMARY IN HYBRID PD ORG: ", number_of_bits_of_summary)
         assert len(decision_list) == (2 ** number_of_bits_of_memory) * (number_of_bits_of_summary + 1)
         print("NEW ORG ALERT")
         print("DECISION LIST LENGTH", len(decision_list))
@@ -80,10 +84,12 @@ class HybridPDGenotype(object):
 
         # Size mutation
         if random_value < MUTATION_LIKELIHOOD_OF_BITS_OF_MEMORY:
+            print("MEMORY SIZE MUTATION", flush=True)
             return self._get_bits_of_memory_mutant()
         # Initial (specific) memory mutation
         # TODO: should we add another mutation likelihood parameter for summary memory?
         if random_value < MUTATION_LIKELIHOOD_OF_BITS_OF_MEMORY + MUTATION_LIKELIHOOD_OF_INITIAL_MEMORY_STATE:
+            print("RANDOM MEMORY MUTATION", flush=True)
             return self._initial_memory_mutant()
         # Decision mutation
         return self._decision_list_mutant()
@@ -121,6 +127,7 @@ class HybridPDGenotype(object):
         if should_increase_memory:
             # Increase specific memory (k)
             if not summary_or_memory:
+                print("MEMORY INCREASING!!!!!!!!!!!!!")
                 # Increment length of specific
                 new_number_of_bits_of_memory += 1 
                 # Add 1 extra bit to specific memory
@@ -130,6 +137,7 @@ class HybridPDGenotype(object):
                         
             # Increase summed memory (j)
             if summary_or_memory:
+                print("SUMMARY INCREASING!!!!!!!!!!!!!")
                 # Increment length of summary
                 new_number_of_bits_of_summary += 1  
                 # Add 1 extra bit to summary memory
@@ -199,6 +207,7 @@ class HybridPDGenotype(object):
         
     def _decision_list_mutant(self):
         """Randomly flip a single bit in decision list"""
+        print("DECISION LIST IN DECISION LIST MUTANT: ", self.decision_list)
         mutation_location = random.randrange(len(self.decision_list))
         new_decision_list = self.decision_list[:]
         new_decision_list[mutation_location] = not new_decision_list[mutation_location]

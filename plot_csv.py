@@ -46,8 +46,8 @@ def average_dll(args):
         color = palette[i]
         
         ax.fill_between(x=df_condition['Generation'],
-                        y1=df_condition['group_mean'] - (df_condition['group_sd'] ** 1/5),
-                        y2=df_condition['group_mean'] + (df_condition['group_sd'] ** 1/5),
+                        y1=df_condition['group_mean'] - (df_condition['group_sd'] ** 1/len(read_columns)),
+                        y2=df_condition['group_mean'] + (df_condition['group_sd'] ** 1/len(read_columns)),
                         color=color, alpha=0.3)
     plt.title(f'Average Decision List Length Over Time')
     plt.ylabel(f'Average Decision List Length')
@@ -89,6 +89,9 @@ def average_mem(args, csv):
         group_mean=('Mean', 'mean'),
         group_sd=('Mean', 'std')
     ).reset_index()
+
+    if 'noise' in args.output_folder:
+        summary_df.to_csv(f'noisy_data/{args.output_folder}_summary.csv')
 
     conditions = summary_df['Condition'].unique()
 

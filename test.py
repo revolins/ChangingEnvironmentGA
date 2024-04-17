@@ -2,7 +2,8 @@ import subprocess
 from tqdm import tqdm
 import argparse
 import datetime
-import sys
+import shutil
+import os
 
 def det_output(args):
     folder_str = 'pd'
@@ -57,6 +58,8 @@ def build_plt_cmd(args):
     return temp_cmd
 
 def run_test(args):
+    if os.path.exists("temp_test"):
+        shutil.rmtree("temp_test")
     output_folder, test_type = det_output(args)
     temp_cmd = format_cmd(args)
     temp_str = build_plt_cmd(args)
@@ -66,19 +69,20 @@ def run_test(args):
     else: print("Initiating Seeded Run")
     for i in tqdm(range(1, args.num_test + 1)):
         for cost in mem_cost:
-            default_cmd = ["python", "changing_environment_ga.py", "--m_c", cost, "-o", f"{output_folder}/pd_{test_type}test{i}_{cost}_cost"]
+            default_cmd = ["python", "changing_environment_ga.py", "--m_c", cost, "-o", f"temp_test/temp_test{cost}"]
+            #default_cmd = ["python", "changing_environment_ga.py", "--m_c", cost, "-o", f"{output_folder}/pd_{test_type}test{i}_{cost}_cost"]
             if not args.ignore_matching: default_cmd.extend(["--seed", f"{i}"])
             if len(temp_cmd) > 0: default_cmd.extend(temp_cmd)
             if len(temp_str) > 0: default_cmd.extend(temp_str)
 
             subprocess.run(default_cmd)
 
-    subprocess.run(["python", "compile_csv.py", "-o", output_folder])
-    plot_str = ["python", "plot_csv.py", "-o", output_folder]
-    if len(temp_str) > 0: plot_str.extend(temp_str)
-    subprocess.run(plot_str)
+    # subprocess.run(["python", "compile_csv.py", "-o", output_folder])
+    # plot_str = ["python", "plot_csv.py", "-o", output_folder]
+    # if len(temp_str) > 0: plot_str.extend(temp_str)
+    # subprocess.run(plot_str)
 
-    print(f"Experiment Concluded, results stored in {output_folder}")
+    print(f"Experiment Concluded, results stored in temp_test")
 
 def main():
     arg_parser = argparse.ArgumentParser(
