@@ -104,6 +104,13 @@ class HybridPDGenotype(object):
 
         # If we increase memory length
         if should_increase_memory:
+            
+            print("====================INCREASE====================")
+            print("=====PREVIOUS=====")
+            print("PREVIOUS memory bits", self.number_of_bits_of_memory)
+            print("PREVIOUS summary bits", self.number_of_bits_of_summary)
+            print("PREV DECISION LIST LEN", len(self.decision_list))
+
             # Specific memory (k)
             new_number_of_bits_of_memory = self.number_of_bits_of_memory
             new_initial_memory = self.initial_memory[:]
@@ -126,15 +133,23 @@ class HybridPDGenotype(object):
 
             # Length of new decision list 2^k(j+1)
             length_of_new_decision_list = 2 ** new_number_of_bits_of_memory * (new_number_of_bits_of_summary + 1)
-            
-            # Double list, duplicate decisions
-            # Retain as much of the original pattern as possible, not sure if matters
-            # Also try to mimic original mutation method as closely as possible
-            new_decision_list = 2 * self.decision_list
-            
-            # Fill the rest of the new list with random decisions
-            for i in range(length_of_new_decision_list - len(new_decision_list)):
-                new_decision_list.append(random.choice([True, False]))
+
+            new_decision_list = self.decision_list
+            # If specific memory is chosen, double list
+            if not summary_or_memory:
+                new_decision_list *= 2
+
+            # If summary memory is chosen, add 2^k random decisions
+            if summary_or_memory:
+                new_decision_list = self.decision_list
+                # Fill the rest of the new list with random decisions 
+                for i in range(length_of_new_decision_list - len(new_decision_list)):
+                    new_decision_list.append(random.choice([True, False]))
+
+            print("=====NEW=====")
+            print("NEW memory bits", new_number_of_bits_of_memory)
+            print("NEW summary bits", new_number_of_bits_of_summary)
+            print("NEW DECISION LIST LEN", len(new_decision_list))
 
             # SANITY CHECK
             assert len(new_decision_list) == length_of_new_decision_list, "DECISION LIST LENGTH DON'T MATCH (INCREASING)"
@@ -147,7 +162,7 @@ class HybridPDGenotype(object):
         new_number_of_bits_of_memory = self.number_of_bits_of_memory
         new_initial_memory = self.initial_memory[:]
         # Decrease specific memory
-        if not summary_or_memory:
+        if not summary_or_memory and self.number_of_bits_of_memory > 0:
             new_number_of_bits_of_memory = self.number_of_bits_of_memory - 1 
             # Remove most distant memory bit
             new_initial_memory = self.initial_memory[:-1]
@@ -156,14 +171,14 @@ class HybridPDGenotype(object):
         new_number_of_bits_of_summary = self.number_of_bits_of_summary
         new_initial_summary = self.initial_summary[:]
         # Decrease summed memory
-        if summary_or_memory:
+        if summary_or_memory and self.number_of_bits_of_summary > 0:
             new_number_of_bits_of_summary = self.number_of_bits_of_summary - 1
             # Remove most distant memory bit
             new_initial_summary = self.initial_summary[:-1]
 
         # Length of new decision list (2^k(j+1))
-        length_of_new_decision_list = 2 ** new_number_of_bits_of_memory * (new_number_of_bits_of_summary + 1) 
-        
+        length_of_new_decision_list = (2 ** new_number_of_bits_of_memory) * (new_number_of_bits_of_summary + 1) 
+
         # Decrease decision list
         new_decision_list = self.decision_list[:length_of_new_decision_list]
 
