@@ -24,8 +24,8 @@ def parse_everything(command_line_args=None):
     arg_parser.add_argument("--sucker", type=str, default="0")
     arg_parser.add_argument("--proportion_cost_per_memory_bit", "--m_c", type=str, default="0.0")
     arg_parser.add_argument("--max_bits_of_memory", "--max_m", type=str, default="4")
-    arg_parser.add_argument("--mutation_likelihood_of_bits_of_memory", "--ml_mem",  type=str, default="0.1")
-    arg_parser.add_argument("--mutation_likelihood_of_initial_memory_state", "--ml_dec", type=str, default="0.1")
+    arg_parser.add_argument("--mutation_likelihood_of_bits_of_memory", "--ml_mem",  type=str, default="0.1") #0.1
+    arg_parser.add_argument("--mutation_likelihood_of_initial_memory_state", "--ml_dec", type=str, default="0.1") #0.1
     arg_parser.add_argument("--toggle_self_memory_on", action='store_true', default=False)
     arg_parser.add_argument("--mutation_rate", "--mr",  type=str, default="0.00")
     arg_parser.add_argument("--output_frequency", type=str, default="10")
