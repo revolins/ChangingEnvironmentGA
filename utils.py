@@ -48,7 +48,7 @@ def get_mutated_population(population):
     new_population = []
     for org in population:
         if random.random() < MUTATION_RATE:
-            print("THIS IS THE ORG THAT IS MUTAITONG: ", org.id)
+            print("MUTATION ON: ", org.id)
             print("ORGANSIM STRING CHECK: ", org.__str__)
             new_org = org.get_mutant()
             new_population.append(new_org)
