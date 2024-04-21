@@ -41,6 +41,27 @@ def plot_noisy(args):
         group_sd=('Mean', 'std')
     ).reset_index()
 
+    list_of_total = glob.glob(join_path(args.input_folder, 'total/*')) 
+    #TODO: replace glob with string functionality that searches folder for aggregate and all_bits_Total_.csv
+    df = pd.read_csv(list_of_total)
+    tot_columns = df.columns[:-2]
+    tot_columns = tot_columns.extend(['Generation', 'Condition', 'Mean'])
+    dll_df = pd.DataFrame(columns=tot_columns)
+    for i in list_of_total:
+        assert 'per' in i, "noise not found in csv name, is noise enabled in test.py?"    
+        df = pd.read_csv(i)
+        nums = extract_integers(i)
+        print(nums)
+        organism_columns = [col for col in df.columns if 'Organism' in col]
+        df['Mean'] = df.apply(lambda row: np.average(row[:len(organism_columns)]), axis=1)
+        df['Condition'] = nums[0]
+        dll_df = pd.concat([dll_df, df], ignore_index=True)
+    
+    summary_df = dll_df.groupby(['Condition', 'Generation'], observed=True).agg(
+        group_mean=('Mean', 'mean'),
+        group_sd=('Mean', 'std')
+    ).reset_index()
+
     conditions = summary_df['Condition'].unique()
     summary_df.to_csv('debug_noise.csv', header=True)
     palette = sns.color_palette("husl", len(conditions))
@@ -58,7 +79,7 @@ def main():
         description='Plotting function for handling noisy_data folder.')
     
     # Expects 1 argument: output folder
-    arg_parser.add_argument("-i", "--input_folder", type=str, default="noisy_data")
+    arg_parser.add_argument("-i", "--input_folder", type=str, default="temp_test")
     args = arg_parser.parse_args()
     plot_noisy(args)
     

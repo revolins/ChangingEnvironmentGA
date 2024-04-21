@@ -29,7 +29,7 @@ def det_output(args):
 
     now = datetime.datetime.now()
     current_time = now.strftime('%m%d%y%H%M%S')
-    output_folder = folder_str + current_time
+    output_folder = folder_str + 'coop' + current_time
 
     return output_folder, folder_str
 

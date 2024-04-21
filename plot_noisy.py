@@ -27,9 +27,14 @@ def plot_noisy(args):
         assert 'noise' in i, "noise not found in folder name, is noise enabled in test.py?"    
         df = pd.read_csv(i)
         average_values = df.groupby('Generation')[['group_mean', 'group_sd']].sum()
-        average_values.loc[average_values['group_sd'] == 0.0, 'group_sd'] = average_values['group_sd'].mean()
+        #average_values.loc[average_values['group_sd'] == 0.0, 'group_sd'] = average_values['group_sd'].mean()
+        #average_values.loc[average_values['group_mean'] == np.min(average_values['group_mean']), 'group_mean'] = average_values['group_mean'].mean()
+        average_values = average_values[average_values['group_sd'] != 0.0]
+        average_values = average_values[average_values['group_mean'] != np.min(average_values['group_mean'])]
         average_values['Condition'] = extract_floats(i)[0]
         average_values = average_values.dropna()
+        average_values.reset_index(inplace=True)
+        average_values.drop(index=249, inplace=True)
         average_values.reset_index(inplace=True)
         average_values['Generation'] = average_values.index
         #print(average_values)
@@ -61,7 +66,7 @@ def main():
         description='Plotting function for handling noisy_data folder.')
     
     # Expects 1 argument: output folder
-    arg_parser.add_argument("-i", "--input_folder", type=str, default="noisy_data/lowmut")
+    arg_parser.add_argument("-i", "--input_folder", type=str, default="noisy_data/highmut")
     args = arg_parser.parse_args()
     plot_noisy(args)
     

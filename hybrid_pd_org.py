@@ -398,7 +398,7 @@ def _create_random_genotype():
 
     length = (2 ** number_of_bits_of_memory) * (number_of_bits_of_summary + 1)
 
-    decision_list = [random.choice([True, False]) for _ in range(length)]
-    initial_memory = [random.choice([True, False]) for _ in range(number_of_bits_of_memory)]
-    initial_summary = [random.choice([True, False]) for _ in range(number_of_bits_of_summary)]
+    decision_list = [random.choice([True, True]) for _ in range(length)]
+    initial_memory = [random.choice([True, True]) for _ in range(number_of_bits_of_memory)]
+    initial_summary = [random.choice([True, True]) for _ in range(number_of_bits_of_summary)]
     return HybridPDGenotype(number_of_bits_of_memory, number_of_bits_of_summary, decision_list, initial_memory, initial_summary)
