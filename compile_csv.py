@@ -67,13 +67,12 @@ def combine_sum_mem_csv(output_folder):
   sum_df.rename(columns=sum_col_dict, inplace=True)
   mem_df.rename(columns=mem_col_dict, inplace=True)
   
-  if mem_df.shape == sum_df.shape: 
-    total_df = sum_df
-    total_df[1:-2] = sum_df[1:-2] + mem_df[1:-2]
-    total_df['Index'], total_df['Condition'], total_df['Generation'] = sum_df['Index'], sum_df['Condition'], sum_df['Generation']
-    del total_df['Index']
-  else:
-    raise Exception(f"Memory - {mem_df.shape} and Summary - {sum_df.shape} DataFrame mismatch shape")
+  assert mem_df.shape == sum_df.shape, f"Memory - {mem_df.shape} and Summary - {sum_df.shape} DataFrame mismatch shape"
+  total_df = sum_df
+  total_df[1:-2] = sum_df[1:-2] + mem_df[1:-2]
+  total_df['Index'], total_df['Condition'], total_df['Generation'] = sum_df['Index'], sum_df['Condition'], sum_df['Generation']
+  del total_df['Index']
+
   total_df.to_csv(join_path(output_folder, f'all_bits_df_Total_comp_more_values.csv'), header=True)
         
 
