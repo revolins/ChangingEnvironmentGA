@@ -37,6 +37,11 @@ python test.py --mut_rat 0.01 --nt 2
 python test.py --mut_rat 0.1 --nt 2
 ```
 
+# Example SLURM Job Submission (Run = automatic submission)
+```
+python slurm.py --mut_rat 0.01 --noise 0.01 --run
+```
+
 # changing_environment_ga.py -- Command Line Arguments
 ## (Required)
 * -o, --output_folder   desired output directory
