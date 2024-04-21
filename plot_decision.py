@@ -10,7 +10,7 @@ from tqdm import tqdm
 
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning) #For those pesky deprecation warnings
-
+# https://www.statsmodels.org/dev/generated/statsmodels.stats.stattools.durbin_watson.html
 def join_path(output_folder, filename):
         return os.path.join(output_folder, filename)
 

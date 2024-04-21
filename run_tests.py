@@ -29,13 +29,13 @@ import subprocess
 # subprocess.run(['python', 'test.py', '--hybrid', "--remove_mem_limit", '--noise', '1.0'])
 
 # #####
-subprocess.run(['python', 'test.py', '--hybrid', "--remove_mem_limit", '--mut_rat', '0.01', '--noise', '0.01'])
+# subprocess.run(['python', 'test.py', '--hybrid', "--remove_mem_limit", '--mut_rat', '0.01', '--noise', '0.01'])
 
-subprocess.run(['python', 'test.py', '--hybrid', "--remove_mem_limit", '--mut_rat', '0.01', '--noise', '0.05'])
+# subprocess.run(['python', 'test.py', '--hybrid', "--remove_mem_limit", '--mut_rat', '0.01', '--noise', '0.05'])
 
-subprocess.run(['python', 'test.py', '--hybrid', "--remove_mem_limit", '--mut_rat', '0.01', '--noise', '0.1'])
+# subprocess.run(['python', 'test.py', '--hybrid', "--remove_mem_limit", '--mut_rat', '0.01', '--noise', '0.1'])
 
-subprocess.run(['python', 'test.py', '--hybrid', "--remove_mem_limit", '--mut_rat', '0.01', '--noise', '0.2'])
+# subprocess.run(['python', 'test.py', '--hybrid', "--remove_mem_limit", '--mut_rat', '0.01', '--noise', '0.2'])
 
 subprocess.run(['python', 'test.py', '--hybrid', "--remove_mem_limit", '--mut_rat', '0.01', '--noise', '0.5'])
 

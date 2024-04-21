@@ -31,6 +31,8 @@ def run_slurm(args):
     output_folder, _ = det_output(args)
     start_cmd = 'srun python test.py'
     full_cmd, slurm_time = build_slurm_cmd(start_cmd, args)
+    if os.path.exists("run_exp.sb"):
+        os.remove("run_exp.sb")
     with open('run_exp.sb', 'w+') as f:
         f.seek(0)
         f.write('#!/bin/bash --login\n')
@@ -46,7 +48,7 @@ def run_slurm(args):
         f.write('#SBATCH --output=%x-%j.SLURMout\n')
 
         f.write('module load Conda/3\n')
-        f.write('conda activate heart_env\n')
+        f.write('conda activate memGA\n')
 
         f.write(full_cmd + '\n')
 
