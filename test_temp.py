@@ -29,7 +29,7 @@ def det_output(args):
 
     now = datetime.datetime.now()
     current_time = now.strftime('%m%d%y%H%M%S')
-    output_folder = folder_str + 'hostile' + current_time
+    output_folder = folder_str + 'coop' + current_time
 
     return output_folder, folder_str
 
@@ -65,19 +65,19 @@ def run_test(args):
     temp_str = build_plt_cmd(args)
 
     mem_cost = ['0.0', '0.01', '0.05', '0.075', '0.2']
-    if args.ignore_matching: print("Initiating Unseeded Run")
-    else: print("Initiating Seeded Run")
-    for i in tqdm(range(1, args.num_test + 1)):
-        for cost in mem_cost:
-            #default_cmd = ["python", "changing_environment_ga.py", "--m_c", cost, "-o", f"temp_test/temp_test{cost}"]
-            default_cmd = ["python", "changing_environment_ga.py", "--m_c", cost, "-o", f"{output_folder}/pd_{test_type}test{i}_{cost}_cost"]
-            if not args.ignore_matching: default_cmd.extend(["--seed", f"{i}"])
-            if len(temp_cmd) > 0: default_cmd.extend(temp_cmd)
-            if len(temp_str) > 0: default_cmd.extend(temp_str)
+    # if args.ignore_matching: print("Initiating Unseeded Run")
+    # else: print("Initiating Seeded Run")
+    # for i in tqdm(range(1, args.num_test + 1)):
+    #     for cost in mem_cost:
+    #         #default_cmd = ["python", "changing_environment_ga.py", "--m_c", cost, "-o", f"temp_test/temp_test{cost}"]
+    #         default_cmd = ["python", "changing_environment_ga.py", "--m_c", cost, "-o", f"{output_folder}/pd_{test_type}test{i}_{cost}_cost"]
+    #         if not args.ignore_matching: default_cmd.extend(["--seed", f"{i}"])
+    #         if len(temp_cmd) > 0: default_cmd.extend(temp_cmd)
+    #         if len(temp_str) > 0: default_cmd.extend(temp_str)
 
-            subprocess.run(default_cmd)
+    #         subprocess.run(default_cmd)
 
-    subprocess.run(["python", "compile_csv.py", "-o", output_folder])
+    # subprocess.run(["python", "compile_csv.py", "-o", output_folder])
     plot_str = ["python", "plot_csv.py", "-o", output_folder]
     if len(temp_str) > 0: plot_str.extend(temp_str)
     subprocess.run(plot_str)
