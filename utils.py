@@ -32,12 +32,14 @@ OUTPUT_FOLDER = None
 OUTPUT_FREQUENCY = None
 SELECTION_BY_STATIC_COMPETITOR = False # True to activate static environment
 RANDOMIZED_ROUNDS = False
+#PROB_ORG = False
 
 def create_initial_population():
     """
     Create a starting population by forming a list of randomly generated organisms.
     """
-    org_type_map = {"pd": pd_org.PDOrg, "hybrid_pd": hybrid_pd_org.HybridPDOrg}
+    org_type_map = {"pd": pd_org.PDOrg, "hybrid_pd": hybrid_pd_org.HybridPDOrg}#,\
+                     #"friend_pd": hybrid_pd_org.HybridPDOrg(genotype='coop'), "hostile_pd": hybrid_pd_org.HybridPDOrg(genotype='hostile')}
     if ORG_TYPE in org_type_map:
         return [org_type_map[ORG_TYPE]() for _ in range(NUMBER_OF_ORGANISMS)]
     
@@ -48,8 +50,6 @@ def get_mutated_population(population):
     new_population = []
     for org in population:
         if random.random() < MUTATION_RATE:
-            # print("MUTATION ON: ", org.id)
-            # print("ORGANSIM STRING CHECK: ", org.__str__)
             new_org = org.get_mutant()
             new_population.append(new_org)
         else:
@@ -171,6 +171,8 @@ def set_global_variables(config):
     MUTATION_RATE = config.getfloat("DEFAULT", "mutation_rate")
     global OUTPUT_FREQUENCY
     OUTPUT_FREQUENCY = config.getint("DEFAULT", "output_frequency")
+    # global PROB_ORG
+    # PROB_ORG = config.getboolean("DEFAULT", "prob_org")
 
     if ORG_TYPE == "pd" or ORG_TYPE == "hybrid_pd":
         pd_org.MAX_BITS_OF_MEMORY = config.getint("DEFAULT", "max_bits_of_memory")
@@ -191,6 +193,7 @@ def set_global_variables(config):
         pd_tournament.SUCKER = config.getint("DEFAULT", "sucker")
         pd_tournament.PROPORTION_COST_PER_MEMORY_BIT = config.getfloat("DEFAULT", "proportion_cost_per_memory_bit")
         pd_tournament.TOGGLE_SELF_MEMORY_ON = config.getboolean("DEFAULT", "toggle_self_memory_on")
+        #pd_tournament.PROB_ORG = config.getboolean("DEFAULT", "prob_org")
         pd_selection.TOURNAMENT_SIZE = config.getint("DEFAULT", "tournament_size")
 
 def save_table_to_file(table, filename):

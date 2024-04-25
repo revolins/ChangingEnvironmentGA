@@ -290,6 +290,10 @@ class HybridPDOrg(object):
     def __init__(self, genotype=None, parent=None):
         if genotype is None:
             genotype = _create_random_genotype()
+        if genotype is 'coop':
+            genotype = _create_friend_genotype()
+        if genotype is 'hostile':
+            genotype = _create_hostile_genotype()
         self.genotype = genotype
         self.memory = None
         self.initialize_memory()
@@ -322,6 +326,13 @@ class HybridPDOrg(object):
     def __hash__(self):
         """Overload hash operator with that of genotype"""
         return hash(self.genotype)
+    
+    def will_cooperate_prob(self):
+        """
+        Organism determines if it will cooperate with a probability determined
+        by the fraction of opponent's moves that it remembers from summary.
+        """
+        return random.choice(self.summary)
         
     def will_cooperate(self):
         """
@@ -401,4 +412,50 @@ def _create_random_genotype():
     decision_list = [random.choice([True, False]) for _ in range(length)]
     initial_memory = [random.choice([True, False]) for _ in range(number_of_bits_of_memory)]
     initial_summary = [random.choice([True, False]) for _ in range(number_of_bits_of_summary)]
+    return HybridPDGenotype(number_of_bits_of_memory, number_of_bits_of_summary, decision_list, initial_memory, initial_summary)
+
+def _create_friend_genotype():
+    """
+    Creates friendly memory PD genotype
+    
+    Used by HybridPDOrg as default returned genotype
+    """
+    # randrange generate number in range [0, MAX_BITS_OF_MEMORY] = total bits of mem
+    # get random index to make a random split
+    # one of the lists may or may not exist
+    # This implies that organisms have the option to use specific, summary memory, or both
+    total_bits_of_memory = random.randrange(MAX_BITS_OF_MEMORY + 1)
+    number_of_bits_of_memory = random.randrange(total_bits_of_memory + 1)
+    number_of_bits_of_summary = total_bits_of_memory - number_of_bits_of_memory
+
+    assert number_of_bits_of_memory + number_of_bits_of_summary <= MAX_BITS_OF_MEMORY
+
+    length = (2 ** number_of_bits_of_memory) * (number_of_bits_of_summary + 1)
+
+    decision_list = [random.choice([True, True]) for _ in range(length)]
+    initial_memory = [random.choice([True, True]) for _ in range(number_of_bits_of_memory)]
+    initial_summary = [random.choice([True, True]) for _ in range(number_of_bits_of_summary)]
+    return HybridPDGenotype(number_of_bits_of_memory, number_of_bits_of_summary, decision_list, initial_memory, initial_summary)
+
+def _create_hostile_genotype():
+    """
+    Creates random memory PD genotype
+    
+    Used by HybridPDOrg as default returned genotype
+    """
+    # randrange generate number in range [0, MAX_BITS_OF_MEMORY] = total bits of mem
+    # get random index to make a random split
+    # one of the lists may or may not exist
+    # This implies that organisms have the option to use specific, summary memory, or both
+    total_bits_of_memory = random.randrange(MAX_BITS_OF_MEMORY + 1)
+    number_of_bits_of_memory = random.randrange(total_bits_of_memory + 1)
+    number_of_bits_of_summary = total_bits_of_memory - number_of_bits_of_memory
+
+    assert number_of_bits_of_memory + number_of_bits_of_summary <= MAX_BITS_OF_MEMORY
+
+    length = (2 ** number_of_bits_of_memory) * (number_of_bits_of_summary + 1)
+
+    decision_list = [random.choice([False, False]) for _ in range(length)]
+    initial_memory = [random.choice([False, False]) for _ in range(number_of_bits_of_memory)]
+    initial_summary = [random.choice([False, False]) for _ in range(number_of_bits_of_summary)]
     return HybridPDGenotype(number_of_bits_of_memory, number_of_bits_of_summary, decision_list, initial_memory, initial_summary)

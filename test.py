@@ -7,8 +7,10 @@ import os
 
 def det_output(args):
     folder_str = 'pd'
-    if args.hybrid:
+    if args.hybrid and not args.prob_org:
         folder_str = folder_str + "hybrid"
+    if args.prob_org and not args.hybrid:
+        folder_str = folder_str + "prob"
     if args.static:
         args.mut_rat = 0.0
         folder_str = folder_str + "static"
@@ -27,6 +29,11 @@ def det_output(args):
     else:
         folder_str = folder_str + "nomut_"
 
+    if args.env_seed == 'coop':
+        folder_str = folder_str + 'coop'
+    if args.env_seed == 'hostile':
+        folder_str = folder_str + 'hostile'
+
     now = datetime.datetime.now()
     current_time = now.strftime('%m%d%y%H%M%S')
     output_folder = folder_str + current_time
@@ -41,10 +48,16 @@ def format_cmd(args):
         temp_cmd.extend(["--mr", str(args.mut_rat)])
     if args.noise > 0.0:
         temp_cmd.extend(["--noise", str(args.noise)])
-    if args.hybrid:
+    if args.hybrid and not args.prob_org:
         temp_cmd.extend(["--org_type", "hybrid_pd"])
+    if args.env_seed == 'hostile':
+        temp_cmd.extend(["--env_seed", "hostile", "--org_type", "hostile_pd"])
+    if args.env_seed == 'coop':
+        temp_cmd.extend(["--env_seed", "coop", "--org_type", "friend_pd"])
+    if args.prob_org:
+        temp_cmd.extend(["--org_type", "hybrid_pd", "--max_bits_of_memory", "0", "--max_bits_of_summary", "4"])
     if args.remove_mem_limit:
-        temp_cmd.extend(["--max_bits_of_memory", str(16)])
+        temp_cmd.extend(["--max_bits_of_memory", "16"])
 
     return temp_cmd
 
@@ -97,6 +110,8 @@ def main():
     arg_parser.add_argument("--output_frequency", "--of", type=int, default=10, help="(int) (DEFAULT = 10) Determines the organisms output to the detail-*.csv, where * is the generation number")
     arg_parser.add_argument("--ignore_matching", "--ms", action='store_true', default=False, help="(bool) (DEFAULT = False) If the experiment will match seeds to the runs")
     arg_parser.add_argument("--remove_mem_limit", "--ml", action='store_true', default=False, help="(bool) (DEFAULT = False) If experiment will run without memory limit on number of bits of summary and memory")
+    arg_parser.add_argument("--env_seed", "--es", type=str, default='', help="(str) (DEFAULT = '') Specify 'hostile' or 'coop' to seed environment with all friendly or all hostile")
+    arg_parser.add_argument("--prob_org", "--po", action='store_true', default=False, help="(bool) (DEFAULT = False) Set to determine if organism is probabilistic")
     args = arg_parser.parse_args()  
     
     run_test(args)

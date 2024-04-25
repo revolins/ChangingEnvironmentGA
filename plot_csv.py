@@ -7,6 +7,7 @@ import argparse
 
 from scipy import stats
 from statsmodels.stats.multicomp import pairwise_tukeyhsd, MultiComparison
+from statsmodels.tsa.stattools import grangercausalitytests
 from tqdm import tqdm
 
 import warnings
@@ -15,8 +16,8 @@ warnings.simplefilter(action='ignore', category=FutureWarning) #For those pesky 
 def join_path(output_folder, filename):
         return os.path.join(output_folder, filename)
 
-def average_dll(args):
-    print(f"Constructing Decision List Length Plots")
+def retrieve_dll(args):
+    print(f"Retrieving Decision List Length Plots")
     bits_of_memory_df = pd.read_csv(join_path(args.output_folder, f"decision_list_length_overtime.csv"))
     bits_of_memory_df.replace([np.inf, -np.inf], np.nan, inplace=True)
     read_columns = bits_of_memory_df.columns[1:-2]
@@ -35,6 +36,11 @@ def average_dll(args):
         group_sd=('Mean', 'std')
     ).reset_index()
 
+    return summary_df, bits_of_memory_df, read_columns
+
+def average_dll(args):
+    
+    summary_df, bits_of_memory_df, read_columns = retrieve_dll(args)
     conditions = summary_df['Condition'].unique()
 
     palette = sns.color_palette("husl", len(conditions))
@@ -85,6 +91,7 @@ def average_mem(args, csv):
     weights = weights / weights.sum()
     bits_of_memory_df['Mean'] = bits_of_memory_df.apply(lambda row: np.average(row[:len(read_columns)], weights=weights), axis=1)
 
+    dll_df, _, _ = retrieve_dll(args)
     summary_df = bits_of_memory_df.groupby(['Condition', 'Generation'], observed=True).agg(
         group_mean=('Mean', 'mean'),
         group_sd=('Mean', 'std')
@@ -110,9 +117,39 @@ def average_mem(args, csv):
     plt.title(f'Weighted Average Bits of {csv_type[3]} Over Time')
     plt.ylabel(f'Weighted Average Bits of {csv_type[3]}')
     plt.grid(False)
-    plt.savefig(join_path(args.output_folder, f'Weighted Average_{csv_type[3]}.png'))
+    plt.savefig(join_path(args.output_folder, f'Weighted_Average_{csv_type[3]}.png'))
 
-    palette = sns.color_palette("husl", len(conditions))
+    tot_mem_bits_df = bits_of_memory_df.groupby(['Generation'], observed=True).agg(
+        group_mean=('Mean', 'mean'),
+        group_sd=('Mean', 'std')
+    ).reset_index()
+
+    plt.figure(figsize=(10, 6))
+    sns.lineplot(data=tot_mem_bits_df, x='Generation', y='group_mean', hue='group_mean', markers=False, dashes=True, palette=plt.colormaps["viridis"])
+    sns.lineplot(data=dll_df, x='Generation', y='group_mean', hue='Condition', style='Condition', markers=False, dashes=False, err_style="band", errorbar='ci', palette=palette)
+    ax = plt.gca()
+    for i, condition in enumerate(conditions):
+        df_condition = dll_df[dll_df['Condition'] == condition]
+        color = palette[i]
+        
+        ax.fill_between(x=df_condition['Generation'],
+                        y1=df_condition['group_mean'] - (df_condition['group_sd'] ** 1/5),
+                        y2=df_condition['group_mean'] + (df_condition['group_sd'] ** 1/5),
+                        color=color, alpha=0.3)
+    plt.title(f'Average Decision List Length Over Time')
+    plt.ylabel(f'Average Decision List Length')
+    plt.grid(False)
+    plt.savefig(join_path(args.output_folder, f'Average_Decision_List_Length_with_Mem_{csv_type[3]}.png'))
+
+    tot_mem_bits_df.loc[tot_mem_bits_df['group_mean'] == np.min(tot_mem_bits_df['group_mean']), 'group_mean'] = tot_mem_bits_df['group_mean'].mean()
+    plt.figure(figsize=(10, 6))
+    sns.lineplot(data=tot_mem_bits_df, x='Generation', y='group_mean', markers=False, dashes=False)
+    plt.title(f'Total Memory Bits Over Time')
+    plt.ylabel(f'Total Memory Bits')
+    plt.grid(False)
+    plt.savefig(join_path(args.output_folder, f'Mem_Bits_Overtime_{csv_type[3]}.png'))
+
+    
     plt.figure(figsize=(10, 6))
     sns.lineplot(data=summary_df, x='Generation', y='group_mean', hue='Condition', style='Condition', markers=False, dashes=False, palette=palette)
     plt.title(f'Weighted Average Bits of {csv_type[3]} Over Time')
@@ -121,30 +158,97 @@ def average_mem(args, csv):
     plt.savefig(join_path(args.output_folder, f'Weighted Average_{csv_type[3]}_NoDashes.png'))
 
     plt.figure(figsize=(10, 6))
+    sns.lineplot(data=summary_df, x='Generation', y='group_mean', hue='Condition', style='Condition', markers=False, dashes=False, palette=palette)
+    sns.lineplot(data=tot_mem_bits_df, x='Generation', y='group_mean', hue='group_mean', markers=False, dashes=True, palette=plt.colormaps["viridis"])
+    plt.title(f'Average Decision List Length Over Time')
+    plt.ylabel(f'Average Decision List Length')
+    plt.grid(False)
+    plt.savefig(join_path(args.output_folder, f'Average_Decision_List_Length_with_Mem_No_Dashes_{csv_type[3]}.png'))
+
+    plt.figure(figsize=(10, 6))
     plt.hist(bits_of_memory_df['Mean'], bins=30)
     plt.title(f'Distribution of Mean Bits of {csv_type[3]}')
     plt.xlabel(f'Mean Bits of {csv_type[3]}')
     plt.ylabel('Frequency')
     plt.savefig(join_path(args.output_folder, f'Mean_{csv_type[3]}.png'))
 
+    forward_df = pd.concat([summary_df['group_mean'], dll_df['group_mean']], axis=1)
+    inv_df = pd.concat([dll_df['group_mean'], summary_df['group_mean']], axis=1)
     with open(join_path(args.output_folder, "stat_output.txt"), "a") as f:
+        f.write("########################################################################################################")
+        f.write("#####################################        Correlation       #########################################")
+        f.write("##############################       Memory versus Decision List Length         ########################")
+        f.write("########################################################################################################")
+        try:
+            pearson_corr = summary_df['group_mean'].corr(dll_df['group_mean'], method='pearson')
+            f.writelines(f'{csv_type[3].upper()} - Pearson Correlation test results: {pearson_corr}')
+            f.write('\n')
+        except:
+            f.write(f"{csv_type[3].upper()} - Pearson Correlation test failed, column mismatch likely")
+            f.write('\n')
+            print(f"{csv_type[3].upper()} - Pearson Correlation test failed, column mismatch likely", flush=True)
+        try:
+            pearson_inv = dll_df['group_mean'].corr(summary_df['group_mean'], method='pearson')
+            f.writelines(f'{csv_type[3].upper()} - Pearson Inverse test results: {pearson_inv}')
+            f.write('\n')
+        except:
+            f.write(f"{csv_type[3].upper()} - Pearson Inverse test failed, column mismatch likely")
+            f.write('\n')
+            print(f"{csv_type[3].upper()} - Pearson Inverse test failed, column mismatch likely", flush=True)
+
+        try:
+            spearman_corr = summary_df['group_mean'].corr(dll_df['group_mean'], method='spearman')
+            f.writelines(f'{csv_type[3].upper()} - Spearman Correlation test results: {spearman_corr}')
+            f.write('\n')
+        except:
+            f.write(f"{csv_type[3].upper()} - Spearman Correlation test failed, column mismatch likely")
+            f.write('\n')
+            print(f"{csv_type[3].upper()} - Spearman Correlation test failed, column mismatch likely", flush=True)
+        
+        try:
+            spearman_inv = dll_df['group_mean'].corr(summary_df['group_mean'], method='spearman')
+            f.writelines(f'{csv_type[3].upper()} - Spearman Inverse test results: {spearman_inv}')
+            f.write('\n')
+        except:
+            f.write(f"{csv_type[3].upper()} - Spearman Inverse test failed, column mismatch likely")
+            f.write('\n')
+            print(f"{csv_type[3].upper()} - Spearman Inverse test failed, column mismatch likely", flush=True)
+        try:
+            granger_caus = grangercausalitytests(forward_df, maxlag=2, verbose=True)
+            f.writelines(f'{csv_type[3].upper()} - Granger Causality test results: {granger_caus}')
+            f.write('\n')
+        except:
+            f.write(f"{csv_type[3].upper()} - Granger Causality test failed, column mismatch likely")
+            f.write('\n')
+            print(f"{csv_type[3].upper()} - Granger Causality test failed, column mismatch likely", flush=True)
+        try:
+            granger_inv = grangercausalitytests(inv_df, maxlag=2, verbose=True)
+            f.writelines(f'{csv_type[3].upper()} - Granger Inverse test results: {granger_inv}')
+            f.write('\n')
+        except:
+            f.write(f"{csv_type[3].upper()} - Granger Inverse test failed, column mismatch likely")
+            f.write('\n')
+            print(f"{csv_type[3].upper()} - Granger Inverse test failed, column mismatch likely", flush=True)
+        f.write("########################################################################################################")
+        f.write("#####################################     Multi-Comparison     #########################################")
+        f.write("########################################################################################################")
         try:
             anova_results = stats.f_oneway(*[group['Mean'].values for name, group in bits_of_memory_df.groupby('Condition', observed=True)])
             f.writelines(f'{csv_type[3].upper()} - ANOVA test results: {anova_results}')
             f.write('\n')
         except:
-            f.write(f"{csv_type[3].upper()} - ANOVA test failed, likely needs more conditions or test runs")
+            f.write(f"{csv_type[3].upper()} - ANOVA test failed, column mismatch likely")
             f.write('\n')
-            print(f"{csv_type[3].upper()} - ANOVA test failed, likely needs more tests", flush=True)
+            print(f"{csv_type[3].upper()} - ANOVA test failed, column mismatch likely", flush=True)
 
         try:
             tukey_results = pairwise_tukeyhsd(bits_of_memory_df['Mean'], bits_of_memory_df['Condition'])
             f.writelines(f'{csv_type[3].upper()} - Tukey test results: {tukey_results}')
             f.write('\n')
         except:
-            f.write(f"{csv_type[3].upper()} - Tukey test failed, likely needs more conditions or test runs")
+            f.write(f"{csv_type[3].upper()} - Tukey test failed, likely, column mismatch likely")
             f.write('\n')
-            print(f"{csv_type[3].upper()} - Tukey test failed, likely needs more conditions or test runs", flush=True)
+            print(f"{csv_type[3].upper()} - Tukey test failed, likely, column mismatch likely", flush=True)
 
         try:
             kruskal_data = bits_of_memory_df[bits_of_memory_df['Generation'] == int(args.number_of_generations) - 1]
@@ -152,9 +256,9 @@ def average_mem(args, csv):
             f.writelines(f"{csv_type[3].upper()} - Kruskal-Wallis test results: {kruskal_results}")
             f.write('\n')
         except:
-            f.write(f"{csv_type[3].upper()} - Kruskal-Wallis Test Failed, results likely identical - can be fixed with more tests")
+            f.write(f"{csv_type[3].upper()} - Kruskal-Wallis Test Failed, results likely identical or column mismatch likely")
             f.write('\n')
-            print(f"{csv_type[3].upper()} - Kruskal-Wallis Test Failed, results likely identical - can be fixed with more tests", flush=True)
+            print(f"{csv_type[3].upper()} - Kruskal-Wallis Test Failed, results likely identical or column mismatch likely", flush=True)
 
         try:
             comparison = MultiComparison(kruskal_data['Mean'], kruskal_data['Condition'])
@@ -162,9 +266,9 @@ def average_mem(args, csv):
             f.writelines(f"{csv_type[3].upper()} - Bonferroni-Corrected Kruskal/Wilcox Test Results: {wilcox_results[0]}")
             f.write('\n')
         except:
-            f.write(f"{csv_type[3].upper()} - Wilcox Test Failed, results likely identical - can be fixed with more tests")
+            f.write(f"{csv_type[3].upper()} - Wilcox Test Failed, results likely identical or column mismatch likely")
             f.write('\n')
-            print(f"{csv_type[3].upper()} - Wilcox Test Failed, results likely identical - can be fixed with more tests", flush=True)
+            print(f"{csv_type[3].upper()} - Wilcox Test Failed, results likely identical or column mismatch likely", flush=True)
     f.close()
 
 def strat_freq(args):
