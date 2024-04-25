@@ -32,6 +32,8 @@ def parse_everything(command_line_args=None):
     arg_parser.add_argument("--selection_by_static_competitor", "--static", action="store_true", default=False)
     arg_parser.add_argument("--randomized_rounds", action="store_true", default=True)
     arg_parser.add_argument("--noise", type=str, default="0.0")
+    #arg_parser.add_argument("--env_seed", type=str, default="")
+    #arg_parser.add_argument("--prob_org", "--po", action='store_true', default=False)
     
     args = arg_parser.parse_args(args=command_line_args)    
 
@@ -66,6 +68,8 @@ def parse_everything(command_line_args=None):
     config.set("DEFAULT", "selection_by_static_competitor", selection_by_static_competitor)
     config.set("DEFAULT", "randomized_rounds", randomized_rounds)
     config.set("DEFAULT", "noise", args.noise)
+    #config.set("DEFAULT", "prob_org", args.prob_org)
+    #config.set("DEFAULT", "env_seed", args.env_seed)
     
     config.set("DEFAULT", "start_time", str(time.time()))
     return config

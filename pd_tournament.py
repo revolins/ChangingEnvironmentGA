@@ -11,6 +11,7 @@ NUMBER_OF_ROUNDS = None
 RANDOMIZED_ROUNDS = False
 SEED = None
 NOISE = None
+PROB_ORG = False
 
 TEMPTATION = 5
 REWARD = 3
@@ -65,8 +66,13 @@ def run_game(organism_a, organism_b):
     
     for _ in range(curr_num_rounds):
         # Decisions from a and b
-        a_cooperates = organism_a.will_cooperate()
-        b_cooperates = organism_b.will_cooperate()
+        if PROB_ORG:
+            print("PROBABILISTIC ORGANISM")
+            a_cooperates = organism_a.will_cooperate_prob()
+            b_cooperates = organism_b.will_cooperate_prob()
+        else:
+            a_cooperates = organism_a.will_cooperate()
+            b_cooperates = organism_b.will_cooperate()
 
         if random.random() < NOISE:
             noisy_decision = np.random.choice([0, 1])

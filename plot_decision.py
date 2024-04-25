@@ -25,7 +25,7 @@ def plot_noisy(args):
     dir_path = os.path.dirname(os.path.realpath(__file__))
     dll_list, bits_list = [], []
     for i, folder_name in enumerate(os.listdir(dir_path)):
-        if args.env_test in folder_name and 'stat_output' not in folder_name:
+        if args.env_test in folder_name and 'stat_output' not in folder_name and 'coop' not in folder_name and 'hostile' not in folder_name:
             assert 'noise' in folder_name, f'noise not found in name of folder - {folder_name}'
             df = pd.read_csv(join_path(folder_name, 'decision_list_length_overtime.csv')) # Which came first the dataframe or the dataframe?
             bits_df = pd.read_csv(join_path(folder_name, 'all_bits_df_Summary_comp_more_values.csv'))
@@ -59,7 +59,7 @@ def plot_noisy(args):
     plt.title(f'Average Decision List Length per Generation')
     plt.ylabel(f'Decision List Length')
     plt.grid(False)
-    plt.savefig('Average_Decision_List_Length_Overtime.png')
+    plt.savefig(f'Average_Decision_List_Length_Overtime_{args.env_test}.png')
 
     
     plot_bit_df = tot_bit_df.groupby(['Condition', 'Generation'], observed=True).agg(
@@ -79,7 +79,7 @@ def plot_noisy(args):
     plt.title(f'Average Bits Of Summary per Generation')
     plt.ylabel(f'Average Bits Of Summary')
     plt.grid(False)
-    plt.savefig('Average_Bits_Of_Summary_Overtime.png')
+    plt.savefig(f'Average_Bits_Of_Summary_Overtime_{args.env_test}.png')
 
     forward_df = pd.concat([plot_bit_df['group_mean'], summary_df['group_mean']], axis=1)
     inv_df = pd.concat([summary_df['group_mean'], plot_bit_df['group_mean']], axis=1)
